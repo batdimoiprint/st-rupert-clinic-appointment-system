@@ -1,15 +1,11 @@
 <script setup>
-import Header from '/src/components/Header.vue'
+import AdminHeader from '/src/components/AdminHeader.vue'
 </script>
 
 <template>
-  <Header />
+  <AdminHeader />
 </template>
 
 <style scoped lang = "scss">
-#App {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-} 
+
 </style>
