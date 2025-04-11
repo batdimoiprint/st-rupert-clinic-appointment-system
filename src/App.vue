@@ -1,17 +1,32 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
+import { ref, onMounted } from 'vue'
+
+const theme = ref('light')
+
+const toggleTheme = () => {
+  theme.value = theme.value === 'light' ? 'dark' : 'light'
+  if (theme.value === 'dark') {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  localStorage.setItem('theme', theme.value)
+}
+
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme') || 'light'
+  theme.value = savedTheme
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <template>
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <HelloWorld :theme="theme" @toggle-theme="toggleTheme" />
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
