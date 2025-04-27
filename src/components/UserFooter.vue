@@ -4,7 +4,7 @@
         <div class = "grid grid-cols-[1.5fr_1fr_.5fr_.5fr] w-full gap-5 p-10 justify-evenly">
             <!-- First Column -->
             <div class = "flex flex-col justify-evenly gap-2">
-                <div class = "flex items-center gap-2 text-secondary-foreground">
+                <div class = "flex items-center gap-2 text-accent-blue">
                     <img src = "@/assets/Logos/StRupertLogo.svg" class = "h-16 w-16 object-contain">
                     <div class = "flex flex-col items-end justify-end">
                         <h2 class = "font-bold text-lg sm:text-xl md:text-2xl">
@@ -18,7 +18,7 @@
                 <p class = "text-justify text-xs">Welcome to St. Rupert Medical Clinic , where patient care is our top priority. We have been providing personalized care to our patients since 2005, and we are proud to be a trusted healthcare provider in the Philippines. </p>
             </div>
             <!-- Second Column -->
-            <div class = "flex flex-col items-start justify-start font-medium text-secondary-foreground">
+            <div class = "flex flex-col items-start justify-start font-medium text-accent-blue">
                 <div class = "flex items-start gap-2">
                     <img src = "@/assets/Footer/Location.svg" class = "h-4 w-4 object-contain">
                     <p class = "text-xs">Unit 132, LTM Building Ramarosa, Luzon Ave, Quezon City, 1119 Metro Manila</p>

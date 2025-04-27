@@ -1,5 +1,5 @@
 <template>
-    <header class = "bg-background text-secondary-foreground w-full h-18 sm:h-20 md:h-22 lg:h-24 flex flex-row font-Inter drop-shadow-sm">
+    <header class = "bg-background text-accent-blue w-full h-18 sm:h-20 md:h-22 lg:h-24 flex flex-row font-Inter drop-shadow-sm">
         <!-- This is the left header (Clinic Logo) -->
         <div class = "flex items-center justify-center w-100">
             <div class = "flex items-center gap-2">
