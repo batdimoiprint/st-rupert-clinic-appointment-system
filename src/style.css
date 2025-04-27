@@ -12,11 +12,11 @@
   --popover: #FFFFFF;
   --popover-foreground: #020817;
 
-  --primary: #104273;
-  --primary-foreground: #F8FAFC;
+  --primary: #FAFAFA;
+  --primary-foreground: #09090B;
 
   --secondary: #F1F5F9;
-  --secondary-foreground: #1E293B;
+  --secondary-foreground: #104273;
 
   --muted: #F1F5F9;
   --muted-foreground: #64748B;
