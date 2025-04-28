@@ -1,5 +1,5 @@
 <template>
-    <div class = "bg-muted font-Inter h-auto w-full">
+    <section class = "bg-muted font-Inter h-auto w-full">
         <div class = "flex flex-row items-center justify-between px-9 h-140"> <!-- Landing Page with reservation button. -->
             <div class = "flex flex-col items-start justify-center h-30 gap-5">
                 <h2 class = "font-black text-4xl text-primary">Your <span class = "text-accent"><br>Best Patient-Friendly</span> Clinic</h2>
@@ -82,7 +82,7 @@
                 </Accordion>
             </div>
         </div>  
-    </div>
+    </section>
 </template>
 
 <script setup lang = "ts">
