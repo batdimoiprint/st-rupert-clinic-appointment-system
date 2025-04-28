@@ -1,7 +1,7 @@
 <script setup lang = "ts">
 import UserHeader from '@/components/UserHeader.vue' 
 import UserFooter from './components/UserFooter.vue'
-import AboutUs from './views/User/AboutUs.vue';
+import AboutUs from './views/User/Homepage.vue';
 </script>
 
 <template>
@@ -9,7 +9,7 @@ import AboutUs from './views/User/AboutUs.vue';
     <UserHeader/>
 
     <main class = "flex-1">
-      <AboutUs/>
+      <router-view></router-view>
     </main>
 
     <UserFooter/>

@@ -1,7 +1,14 @@
-import { createRouter, createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+import Homepage from '@/views/User/Homepage.vue'
 
-// The routes for the main webpages goes here.
+const routes = [
+    { path: '/', redirect: '/home' },  
+    { path: '/home', component: Homepage, meta: { title: 'Home' } },
+]
 
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+})
 
-// The routes for the other webpages goes here.
-
+export default router

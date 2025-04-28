@@ -20,11 +20,11 @@
             <!-- Second Column -->
             <div class = "flex flex-col items-start justify-start font-medium text-accent-blue">
                 <div class = "flex items-start gap-2">
-                    <img src = "@/assets/Footer/Location.svg" class = "h-4 w-4 object-contain">
+                    <MapPin class = "h-7 w-7 text-foreground"/>
                     <p class = "text-xs">Unit 132, LTM Building Ramarosa, Luzon Ave, Quezon City, 1119 Metro Manila</p>
                 </div>
                 <div class = "flex items-center gap-2 mt-2">
-                    <img src = "@/assets/Footer/Contact.svg" class = "h-4 w-4 object-contain">
+                    <Phone class = "h-4 w-5 text-foreground"/>
                     <p class = "text-xs">09202547595  |  8-373-8421</p>
                 </div>
             </div>
@@ -45,3 +45,7 @@
         </div>
     </footer>
 </template>
+
+<script setup lang = "ts">
+import { Phone, MapPin } from 'lucide-vue-next'
+</script>
