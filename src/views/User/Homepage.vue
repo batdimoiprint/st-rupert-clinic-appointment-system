@@ -29,7 +29,7 @@
                 </Card>
             </div>
         </div>
-        <div class = "flex flex-col items-center h-auto"> <!-- Services -->
+        <div section id = "our-services" class = "flex flex-col items-center h-auto scroll-mt-24"> <!-- Services -->
             <h2 class = "bg-primary text-primary-foreground text-xl text-center font-bold w-full">
                 Our Services
             </h2>
@@ -64,7 +64,7 @@
                 </Card>
             </div>
         </div>
-        <div class = "flex flex-col items-center h-auto"> <!-- FAQs -->
+        <div section id = "faqs" class = "flex flex-col items-center h-auto"> <!-- FAQs -->
             <h2 class = "bg-primary text-primary-foreground text-xl text-center font-bold w-full">
                 Frequently Asked Questions
             </h2>

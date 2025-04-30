@@ -31,16 +31,16 @@
             <!-- Third Column -->
             <div class = "flex flex-col items-center justify-start gap-2">
                 <h3 class="text-left w-full">Shortcuts</h3>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">Home</router-link>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">FAQs</router-link>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">Our Services</router-link>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">About Us</router-link>
+                <router-link to = "/home" class="text-xs opacity-75 cursor-pointer text-left w-full">Home</router-link>
+                <router-link to = "/home#faqs" class="text-xs opacity-75 cursor-pointer text-left w-full">FAQs</router-link>
+                <router-link to = "/home#our-services" class="text-xs opacity-75 cursor-pointer text-left w-full">Our Services</router-link>
+                <router-link to = "/about" class="text-xs opacity-75 cursor-pointer text-left w-full">About Us</router-link>
             </div>
             <!-- Fourth Column -->
             <div class = "flex flex-col items-start justify-start gap-2">
                 <h3 class = "text-left">Legal Terms</h3>
-                <router-link to = "#" class = "text-xs opacity-75 cursor-pointer text-left">Terms and Conditions</router-link>
-                <router-link to = "#" class = "text-xs opacity-75 cursor-pointer text-left">Privacy Policy</router-link>
+                <router-link to = "/terms" class = "text-xs opacity-75 cursor-pointer text-left">Terms and Conditions</router-link>
+                <router-link to = "/privacy" class = "text-xs opacity-75 cursor-pointer text-left">Privacy Policy</router-link>
             </div>
         </div>
     </footer>

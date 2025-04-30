@@ -18,8 +18,8 @@
         <div class = "flex flex-row items-center justify-evenly w-225 font-medium text-xs sm:text-sm md:text-md lg:text-base">
             <router-link to = "/home" class = "cursor-pointer">Home</router-link>
             <router-link to = "/about" class = "cursor-pointer">About Us</router-link>
-            <router-link to = "" class = "cursor-pointer">Our Services</router-link>
-            <router-link to = "" class = "cursor-pointer">Mission, Vision, and Goals</router-link>
+            <router-link to = "/home#our-services" class = "cursor-pointer"> Our Services</router-link>
+            <router-link to = "/mvg" class = "cursor-pointer">Mission, Vision, and Goals</router-link>
             <router-link to = "" class = "cursor-pointer">Admin Log In</router-link>
         </div>
     </header>
