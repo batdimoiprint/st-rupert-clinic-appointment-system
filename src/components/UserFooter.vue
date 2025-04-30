@@ -20,28 +20,32 @@
             <!-- Second Column -->
             <div class = "flex flex-col items-start justify-start font-medium text-accent-blue">
                 <div class = "flex items-start gap-2">
-                    <img src = "@/assets/Footer/Location.svg" class = "h-4 w-4 object-contain">
+                    <MapPin class = "h-7 w-7 text-foreground"/>
                     <p class = "text-xs">Unit 132, LTM Building Ramarosa, Luzon Ave, Quezon City, 1119 Metro Manila</p>
                 </div>
                 <div class = "flex items-center gap-2 mt-2">
-                    <img src = "@/assets/Footer/Contact.svg" class = "h-4 w-4 object-contain">
+                    <Phone class = "h-4 w-5 text-foreground"/>
                     <p class = "text-xs">09202547595  |  8-373-8421</p>
                 </div>
             </div>
             <!-- Third Column -->
             <div class = "flex flex-col items-center justify-start gap-2">
                 <h3 class="text-left w-full">Shortcuts</h3>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">Home</router-link>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">FAQs</router-link>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">Our Services</router-link>
-                <router-link to = "#" class="text-xs opacity-75 cursor-pointer text-left w-full">About Us</router-link>
+                <router-link to = "/home" class="text-xs opacity-75 cursor-pointer text-left w-full">Home</router-link>
+                <router-link to = "/home#faqs" class="text-xs opacity-75 cursor-pointer text-left w-full">FAQs</router-link>
+                <router-link to = "/home#our-services" class="text-xs opacity-75 cursor-pointer text-left w-full">Our Services</router-link>
+                <router-link to = "/about" class="text-xs opacity-75 cursor-pointer text-left w-full">About Us</router-link>
             </div>
             <!-- Fourth Column -->
             <div class = "flex flex-col items-start justify-start gap-2">
                 <h3 class = "text-left">Legal Terms</h3>
-                <router-link to = "#" class = "text-xs opacity-75 cursor-pointer text-left">Terms and Conditions</router-link>
-                <router-link to = "#" class = "text-xs opacity-75 cursor-pointer text-left">Privacy Policy</router-link>
+                <router-link to = "/terms" class = "text-xs opacity-75 cursor-pointer text-left">Terms and Conditions</router-link>
+                <router-link to = "/privacy" class = "text-xs opacity-75 cursor-pointer text-left">Privacy Policy</router-link>
             </div>
         </div>
     </footer>
 </template>
+
+<script setup lang = "ts">
+import { Phone, MapPin } from 'lucide-vue-next'
+</script>
