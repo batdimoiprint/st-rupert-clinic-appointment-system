@@ -4,7 +4,11 @@
             <div class = "flex flex-col items-start justify-center h-30 gap-5">
                 <h2 class = "font-black text-4xl text-primary">Your <span class = "text-accent"><br>Best Patient-Friendly</span> Clinic</h2>
                 <p class = "font-medium">Serving you 7 days a week from 7:30AM to 5:30PM</p>
-                <Button variant = "default" class = "cursor-pointer">Request Appointment</Button>
+                <Button asChild variant = "default" class = "cursor-pointer">
+                    <router-link to = "/form">
+                        Request Appointment
+                    </router-link>
+                </Button>
             </div>
             <div class = "flex flex-col items-start justify-center">
                 <img src = "@/assets/About/About-1.svg" class = "h-150 w-150 object-contain">
@@ -56,11 +60,11 @@
                         </li>
                         </ul>
                     </CardContent>
-                    <div class = "mt-auto w-full flex justify-center pt-4">
-                        <Button variant="default" class = "cursor-pointer">
-                        Request Appointment
-                        </Button>
-                    </div>
+                    <Button asChild variant = "default" class = "cursor-pointer mx-auto mb-4">
+                        <router-link to="/form">
+                            Request Appointment
+                        </router-link>
+                    </Button>
                 </Card>
             </div>
         </div>
@@ -94,7 +98,7 @@ import Step2 from '@/assets/About/Step-2.svg'
 import Step3 from '@/assets/About/Step-3.svg'
 import Step4 from '@/assets/About/Step-4.svg'
 import Bacteriology from '@/assets/ClinicServices/Bacteriology.svg'
-import BloodTest from '@/assets/ClinicServices/BloodTest.svg'
+import BloodChemistry from '@/assets/ClinicServices/BloodTest.svg'
 import Consultation from '@/assets/ClinicServices/Consultation.svg'
 import Electrolytes from '@/assets/ClinicServices/Electrolytes.svg'
 import Hematology from '@/assets/ClinicServices/Hematology.svg'
@@ -142,8 +146,8 @@ const servicesCards = [
         ]
     },
     {
-        title: 'Blood Test',
-        image: BloodTest,
+        title: 'Blood Chemistry',
+        image: BloodChemistry,
         procedures: [
             { name: 'Fasting Blood Sugar (FBS)', price: 250},
             { name: 'Random Blood Sugar (RBS)', price: 300},

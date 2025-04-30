@@ -4,10 +4,12 @@ import AboutUs from '@/views/User/AboutUs.vue'
 import MVG from '@/views/User/MVG.vue'
 import TermsAndConditions from '@/views/User/TermsAndConditions.vue'
 import PrivacyPolicy from '@/views/User/PrivacyPolicy.vue'
+import AppointmentForm from '@/views/User/AppointmentForm.vue'
 
 const routes = [
     { path: '/', redirect: '/home' },  
     { path: '/home', component: Homepage, meta: { title: 'Home' } },
+    { path: '/form', component: AppointmentForm, meta: { title: 'Appointment Form'} },
     { path: '/about', component: AboutUs, meta: { title: 'About'} },
     { path: '/mvg', component: MVG, meta: { title: 'Mission, Vision, and Goals'} },
     { path: '/terms', component: TermsAndConditions, meta: { title: 'Terms and Conditions'} },
