@@ -9,7 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.17",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
+    "@fullcalendar/vue3": "^6.1.17",
     "@tailwindcss/vite": "^4.1.3",
+    "@tanstack/vue-table": "^8.21.3",
     "@vuepic/vue-datepicker": "^11.0.2",
     "@vueuse/core": "^13.1.0",
     "axios": "^1.9.0",
@@ -17,6 +23,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-vue": "^8.6.0",
+    "lucide-vue": "^0.503.0",
     "lucide-vue-next": "^0.487.0",
     "reka-ui": "^2.2.0",
     "sonner": "^2.0.3",
