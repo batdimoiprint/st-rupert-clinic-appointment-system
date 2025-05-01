@@ -20,7 +20,6 @@
             <router-link to = "/about" class = "cursor-pointer">About Us</router-link>
             <router-link to = "/home#our-services" class = "cursor-pointer"> Our Services</router-link>
             <router-link to = "/mvg" class = "cursor-pointer">Mission, Vision, and Goals</router-link>
-            <router-link to = "/admin" class = "cursor-pointer">Admin Log In</router-link>
         </div>
     </header>
 </template>
