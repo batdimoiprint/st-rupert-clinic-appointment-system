@@ -28,8 +28,17 @@
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="header.id">
-                {{ header.column.columnDef.header }}
+              <TableHead 
+                v-for="header in table.getHeaderGroups()[0].headers" 
+                :key="header.id"
+                :class="{ 'cursor-pointer': header.column.id !== 'actions' }"
+                @click="header.column.id !== 'actions' ? handleHeaderClick(header.column) : null"
+              >
+                <div class="flex items-center">
+                  {{ header.column.columnDef.header }}
+                  <ChevronDown v-if="sorting[0]?.id === header.column.id && sorting[0]?.desc" class="ml-2 h-4 w-4" />
+                  <ChevronUp v-else-if="sorting[0]?.id === header.column.id && !sorting[0]?.desc" class="ml-2 h-4 w-4" />
+                </div>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -65,7 +74,11 @@
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Gender</h4>
-                                  <p>{{ row.original.basic_info?.gender || 'N/A' }}</p>
+                                  <p>{{ row.original.basic_info?.sex || row.original.basic_info?.gender || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium">Age</h4>
+                                  <p>{{ row.original.basic_info?.age || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Email Address</h4>
@@ -77,7 +90,7 @@
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Contact Number</h4>
-                                  <p>{{ row.original.basic_info?.contact_number || 'N/A' }}</p>
+                                  <p>{{ row.original.basic_info?.contact_number || row.original.basic_info?.contact_no || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Address</h4>
@@ -92,6 +105,10 @@
                                 <div>
                                   <h4 class="text-sm font-medium">Service</h4>
                                   <p>{{ row.original.procedure?.name || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium">Price</h4>
+                                  <p>₱{{ row.original.procedure?.price || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Schedule Date</h4>
@@ -132,6 +149,35 @@
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   </div>
+                                </div>
+                                <div v-if="row.original.payment_status === 'succeeded'">
+                                  <h4 class="text-sm font-medium">Payment ID</h4>
+                                  <p>{{ row.original.payment_id }}</p>
+                                </div>
+                                <div v-if="row.original.payment_status === 'succeeded'">
+                                  <h4 class="text-sm font-medium">Payment Status</h4>
+                                  <p>{{ row.original.payment_status }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div v-if="row.original.medical_notes">
+                              <h3 class="text-lg font-semibold mb-2">Medical Notes</h3>
+                              <div class="p-3 border rounded bg-gray-50">
+                                <p class="whitespace-pre-wrap">{{ row.original.medical_notes }}</p>
+                              </div>
+                            </div>
+                            
+                            <div v-if="row.original.payment_status === 'succeeded'">
+                              <h3 class="text-lg font-semibold mb-2">Metadata</h3>
+                              <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 class="text-sm font-medium">Created</h4>
+                                  <p>{{ formatDateTime(row.original.created_at) }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium">Last Updated</h4>
+                                  <p>{{ formatDateTime(row.original.updated_at) }}</p>
                                 </div>
                               </div>
                             </div>
@@ -211,7 +257,7 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem 
 } from '@/components/ui/dropdown-menu';
-import { SearchIcon, PrinterIcon } from 'lucide-vue-next';
+import { SearchIcon, PrinterIcon, ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { 
   Table, 
   TableBody, 
@@ -257,8 +303,8 @@ const pagination = ref({
 // Total items count from all available data
 const totalItems = ref(0);
 
-// Sort state
-const sorting = ref([{ id: 'date', desc: true }]); // Default sort by date descending
+// Sort state - initially sort by date in ascending order (earliest first)
+const sorting = ref([{ id: 'date', desc: false }]);
 
 // Create a column helper
 const columnHelper = createColumnHelper();
@@ -326,6 +372,12 @@ function setSorting(updater) {
   applyPagination();
 }
 
+// Handle header click for sorting
+function handleHeaderClick(column) {
+  const isDesc = sorting.value[0]?.id === column.id && sorting.value[0]?.desc;
+  setSorting([{ id: column.id, desc: !isDesc }]);
+}
+
 // Format status for display
 function formatStatus(status) {
   if (!status) return 'Pending';
@@ -353,6 +405,61 @@ function getStatusClass(status) {
   };
   return classes[status] || classes.pending;
 };
+
+// Format time to show as range in 12-hour format
+function formatTimeRange(time) {
+  if (!time) return '';
+  
+  // If it's already in the format "8:00 AM - 9:00 AM", return as is
+  if (time.includes('-')) return time;
+  
+  // Parse the time (assuming it's in 24hr format like "08:00:00" or "8:00")
+  let hour = 0;
+  let minute = 0;
+  let amPm = 'AM';
+  
+  // Handle different time formats
+  if (time.includes(':')) {
+    const parts = time.split(':');
+    hour = parseInt(parts[0], 10);
+    minute = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+  } else {
+    hour = parseInt(time, 10);
+  }
+  
+  // Convert to 12-hour format for display
+  if (hour >= 12) {
+    amPm = 'PM';
+    if (hour > 12) hour -= 12;
+  } else if (hour === 0) {
+    hour = 12;
+  }
+  
+  // Format start time
+  const startTime = `${hour}:${minute.toString().padStart(2, '0')} ${amPm}`;
+  
+  // Calculate end time (1 hour later)
+  let endHour = hour + 1;
+  let endAmPm = amPm;
+  
+  if (hour === 11) {
+    endHour = 12;
+    endAmPm = amPm === 'AM' ? 'PM' : 'AM';
+  } else if (hour === 12) {
+    endHour = 1;
+  }
+  
+  const endTime = `${endHour}:${minute.toString().padStart(2, '0')} ${endAmPm}`;
+  
+  return `${startTime} - ${endTime}`;
+}
+
+// Format date and time for display
+function formatDateTime(dateTime) {
+  if (!dateTime) return 'N/A';
+  const date = new Date(dateTime);
+  return date.toLocaleString();
+}
 
 // Apply client-side pagination, sorting and filtering
 function applyPagination() {
@@ -437,22 +544,35 @@ function goToPage(page) {
 async function fetchAppointments() {
   isLoading.value = true;
   try {
-    const response = await axios.get(`${API_URL}/api/admin/appointments`);
+    // Requesting data sorted by appointment_date in ascending order
+    const response = await axios.get(`${API_URL}/api/admin/appointments`, {
+      params: {
+        sort: 'appointment_date',
+        order: 'asc'
+      }
+    });
+    
     if (response.data.success) {
       // Transform the data to match our table structure
       allAppointments.value = response.data.appointments.map(appointment => ({
         id: appointment.id,
         date: appointment.appointment_date,
-        time: appointment.appointment_time,
+        time: formatTimeRange(appointment.appointment_time),
         patient: `${appointment.basic_info?.first_name || ''} ${appointment.basic_info?.last_name || ''}`,
         service: appointment.procedure?.name || 'N/A',
         status: appointment.status || 'pending',
         // Store complete objects for detailed view
         basic_info: appointment.basic_info,
-        procedure: appointment.procedure
+        procedure: appointment.procedure,
+        raw_time: appointment.appointment_time, // Store the original time for API calls
+        payment_id: appointment.payment_id,
+        payment_status: appointment.payment_status,
+        medical_notes: appointment.medical_notes,
+        created_at: appointment.created_at,
+        updated_at: appointment.updated_at
       }));
       
-      // Apply pagination, sorting and filtering
+      // Apply pagination, sorting and filtering - ensuring earliest dates first
       applyPagination();
     } else {
       console.error('Failed to fetch appointments:', response.data.message);

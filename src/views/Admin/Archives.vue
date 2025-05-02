@@ -164,41 +164,22 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
   createColumnHelper,
   getCoreRowModel,
   useVueTable,
   getFilteredRowModel,
 } from '@tanstack/vue-table';
+import axios from 'axios';
+
+// Import environment variables
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 // Define the data structure for archived appointments
-const archivedAppointments = ref([
-  {
-    id: 1,
-    date: 'April 28, 2025',
-    patient: 'Agapito Dimatibag',
-    service: 'Hematology',
-    status: 'Completed',
-    statusColor: 'green',
-  },
-  {
-    id: 2,
-    date: 'April 25, 2025',
-    patient: 'Juan Dela Cruz',
-    service: 'Consultation',
-    status: 'Cancelled',
-    statusColor: 'red',
-  },
-  {
-    id: 3,
-    date: 'April 20, 2025',
-    patient: 'Maria Santos',
-    service: 'X-ray',
-    status: 'Completed',
-    statusColor: 'green',
-  },
-]);
+const archivedAppointments = ref([]);
+const loading = ref(false);
+const error = ref(null);
 
 // Global search filter
 const globalFilter = ref('');
@@ -232,6 +213,52 @@ const columns = [
     cell: () => null, // We'll handle this in the template
   }),
 ];
+
+// Fetch archived appointments from API
+const fetchArchivedAppointments = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const response = await axios.get(`${backendUrl}/api/admin/archived-appointments`);
+    if (response.data.success) {
+      // Transform the data to match our table structure
+      archivedAppointments.value = response.data.archived.map(appointment => {
+        const patient = appointment.basic_info;
+        const fullName = patient ? `${patient.first_name} ${patient.last_name}` : 'Unknown Patient';
+        
+        // For archived appointments, always set status to "Expired" regardless of actual status
+        const statusColor = 'gray'; // Use gray color for expired status
+        
+        return {
+          id: appointment.id,
+          date: new Date(appointment.appointment_date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          patient: fullName,
+          service: appointment.procedure ? appointment.procedure.name : 'Unknown Service',
+          status: 'Expired', // Override status to always show "Expired"
+          statusColor: statusColor,
+          // Store the full appointment data for the dialog
+          appointmentData: appointment,
+          // Store original status for reference if needed
+          originalStatus: appointment.status
+        };
+      });
+    }
+  } catch (err) {
+    console.error('Failed to fetch archived appointments:', err);
+    error.value = 'Failed to load archived appointments. Please try again later.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Load data when component mounts
+onMounted(() => {
+  fetchArchivedAppointments();
+});
 
 // Create table instance with filtering
 const table = useVueTable({
