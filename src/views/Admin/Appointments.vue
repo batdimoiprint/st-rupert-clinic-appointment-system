@@ -36,7 +36,12 @@
           <TableBody>
             <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
               <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                <template v-if="cell.column.id === 'actions'">
+                <template v-if="cell.column.id === 'status'">
+                  <span :class="getStatusClass(row.original.status)">
+                    {{ formatStatus(row.original.status) }}
+                  </span>
+                </template>
+                <template v-else-if="cell.column.id === 'actions'">
                   <div class="flex space-x-2">
                     <Dialog>
                       <DialogTrigger asChild>
@@ -56,27 +61,27 @@
                               <div class="grid grid-cols-2 gap-4">
                                 <div>
                                   <h4 class="text-sm font-medium">Full Name</h4>
-                                  <p>{{ row.original.patient }}</p>
+                                  <p>{{ row.original.basic_info?.first_name || '' }} {{ row.original.basic_info?.last_name || '' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Gender</h4>
-                                  <p>Male</p>
+                                  <p>{{ row.original.basic_info?.gender || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Email Address</h4>
-                                  <p>patient@example.com</p>
+                                  <p>{{ row.original.basic_info?.email || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Birthdate</h4>
-                                  <p>January 15, 1985</p>
+                                  <p>{{ row.original.basic_info?.birthdate || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Contact Number</h4>
-                                  <p>+63 912 345 6789</p>
+                                  <p>{{ row.original.basic_info?.contact_number || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Address</h4>
-                                  <p>123 Main Street, Quezon City</p>
+                                  <p>{{ row.original.basic_info?.address || 'N/A' }}</p>
                                 </div>
                               </div>
                             </div>
@@ -86,7 +91,7 @@
                               <div class="grid grid-cols-2 gap-4">
                                 <div>
                                   <h4 class="text-sm font-medium">Service</h4>
-                                  <p>{{ row.original.service }}</p>
+                                  <p>{{ row.original.procedure?.name || 'N/A' }}</p>
                                 </div>
                                 <div>
                                   <h4 class="text-sm font-medium">Schedule Date</h4>
@@ -102,29 +107,26 @@
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
                                         <Button variant="outline" class="w-full text-left">
-                                          {{ appointmentStatus }}
+                                          {{ formatStatus(row.original.status || 'pending') }}
                                         </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent class="w-full">
-                                        <DropdownMenuItem @click="appointmentStatus = 'Confirmed'">
-                                          <span class="text-green-600 font-medium">Confirmed</span>
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'pending')">
+                                          <span class="text-gray-600 font-medium">Pending</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="appointmentStatus = 'Checked In'">
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'checked-in')">
                                           <span class="text-blue-600 font-medium">Checked In</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="appointmentStatus = 'In Consultation'">
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'in_consultation')">
                                           <span class="text-purple-600 font-medium">In Consultation</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="appointmentStatus = 'Billing'">
-                                          <span class="text-amber-600 font-medium">Billing</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="appointmentStatus = 'Completed'">
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'complete')">
                                           <span class="text-emerald-600 font-medium">Completed</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="appointmentStatus = 'Cancelled'">
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'cancelled')">
                                           <span class="text-red-600 font-medium">Cancelled</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="appointmentStatus = 'No Show'">
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'no-show')">
                                           <span class="text-gray-600 font-medium">No Show</span>
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
@@ -136,13 +138,9 @@
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button variant="outline" class="mr-2">
+                          <Button variant="outline">
                             <PrinterIcon class="h-4 w-4 mr-2" />
                             Print
-                          </Button>
-                          <Button>
-                            <PencilIcon class="h-4 w-4 mr-2" />
-                            Edit
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -161,6 +159,34 @@
             </TableRow>
           </TableBody>
         </Table>
+
+        <!-- Pagination Controls -->
+        <div class="flex items-center justify-between space-x-2 py-4">
+          <div class="flex-1 text-sm text-muted-foreground">
+            Showing <span class="font-medium">{{ pagination.startIndex + 1 }}</span> to 
+            <span class="font-medium">{{ Math.min(pagination.endIndex, totalItems) }}</span> of 
+            <span class="font-medium">{{ totalItems }}</span> results
+          </div>
+          <div class="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              @click="goToPage(pagination.page - 1)"
+              :disabled="pagination.page === 1 || isLoading"
+            >
+              Previous
+            </Button>
+            <span class="mx-2">Page {{ pagination.page }} of {{ pagination.totalPages }}</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              @click="goToPage(pagination.page + 1)"
+              :disabled="pagination.page === pagination.totalPages || isLoading" 
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   </div>
@@ -185,7 +211,7 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem 
 } from '@/components/ui/dropdown-menu';
-import { SearchIcon, PrinterIcon, PencilIcon } from 'lucide-vue-next';
+import { SearchIcon, PrinterIcon } from 'lucide-vue-next';
 import { 
   Table, 
   TableBody, 
@@ -195,56 +221,49 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
   createColumnHelper,
   getCoreRowModel,
   useVueTable,
   getFilteredRowModel,
+  getSortedRowModel,
 } from '@tanstack/vue-table';
+import axios from 'axios';
 
-// Define the data structure for appointments
-const appointments = ref([
-  {
-    id: 1,
-    date: 'May 2, 2025',
-    time: '8:00 AM - 9:00 AM',
-    patient: 'Juan Dela Cruz',
-    service: 'Hematology',
-  },
-  {
-    id: 2,
-    date: 'May 3, 2025',
-    time: '10:00 AM - 11:00 AM',
-    patient: 'Maria Santos',
-    service: 'X-ray',
-  },
-  {
-    id: 3,
-    date: 'May 4, 2025',
-    time: '1:00 PM - 2:00 PM',
-    patient: 'Pedro Penduko',
-    service: 'Consultation',
-  },
-  {
-    id: 4,
-    date: 'May 5, 2025',
-    time: '9:30 AM - 10:30 AM',
-    patient: 'Lucia Reyes',
-    service: 'Blood Test',
-  },
-]);
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_BACKEND_URL || '';
+
+// Store all appointments data
+const allAppointments = ref([]);
+// Paginated appointments data to display
+const paginatedAppointments = ref([]);
+
+// Loading state for API operations
+const isLoading = ref(false);
 
 // Global search filter
 const globalFilter = ref('');
 
-// Status combobox value
-const appointmentStatus = ref('Confirmed');
+// Pagination state
+const pagination = ref({
+  page: 1,
+  limit: 10,
+  totalPages: 1,
+  startIndex: 0,
+  endIndex: 0,
+});
+
+// Total items count from all available data
+const totalItems = ref(0);
+
+// Sort state
+const sorting = ref([{ id: 'date', desc: true }]); // Default sort by date descending
 
 // Create a column helper
 const columnHelper = createColumnHelper();
 
-// Define columns
+// Define columns with sortable headers
 const columns = [
   columnHelper.accessor('date', {
     header: 'Date',
@@ -262,39 +281,217 @@ const columns = [
     header: 'Service',
     cell: info => info.getValue(),
   }),
+  columnHelper.accessor('status', {
+    header: 'Status',
+    cell: info => info.getValue(),
+  }),
   columnHelper.accessor('actions', {
     header: 'Actions',
     cell: () => null, // We'll handle this in the template
   }),
 ];
 
-// Create table instance with filtering
+// Create table instance with filtering and sorting
 const table = useVueTable({
   get data() {
-    return appointments.value;
+    return paginatedAppointments.value;
   },
   columns,
   getCoreRowModel: getCoreRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
+  getSortedRowModel: getSortedRowModel(),
   state: {
     get globalFilter() {
       return globalFilter.value;
+    },
+    get sorting() {
+      return sorting.value;
     }
   },
   onGlobalFilterChange: setGlobalFilter,
+  onSortingChange: setSorting,
 });
 
 function setGlobalFilter(value) {
   globalFilter.value = value;
+  applyPagination();
 }
 
-// Count of filtered rows
+function setSorting(updater) {
+  if (typeof updater === 'function') {
+    sorting.value = updater(sorting.value);
+  } else {
+    sorting.value = updater;
+  }
+  applyPagination();
+}
+
+// Format status for display
+function formatStatus(status) {
+  if (!status) return 'Pending';
+  
+  switch(status) {
+    case 'pending': return 'Pending';
+    case 'checked-in': return 'Checked In';
+    case 'in_consultation': return 'In Consultation';
+    case 'complete': return 'Complete';
+    case 'cancelled': return 'Cancelled';
+    case 'no-show': return 'No Show';
+    default: return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+};
+
+// Get status color class based on status
+function getStatusClass(status) {
+  const classes = {
+    pending: 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs',
+    'checked-in': 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs',
+    'in_consultation': 'bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs',
+    complete: 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs',
+    cancelled: 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs',
+    'no-show': 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs',
+  };
+  return classes[status] || classes.pending;
+};
+
+// Apply client-side pagination, sorting and filtering
+function applyPagination() {
+  const sortColumn = sorting.value.length > 0 ? sorting.value[0].id : 'date';
+  const sortOrder = sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc';
+  
+  // First, filter the data based on globalFilter if it exists
+  let filteredData = [...allAppointments.value];
+  if (globalFilter.value) {
+    const search = globalFilter.value.toLowerCase();
+    filteredData = filteredData.filter(item => {
+      // Search in all text fields
+      return item.patient.toLowerCase().includes(search) ||
+             item.service.toLowerCase().includes(search) ||
+             item.date.toLowerCase().includes(search) ||
+             item.time.toLowerCase().includes(search) ||
+             formatStatus(item.status).toLowerCase().includes(search);
+    });
+  }
+  
+  // Next, sort the filtered data
+  filteredData.sort((a, b) => {
+    let valueA = a[sortColumn];
+    let valueB = b[sortColumn];
+    
+    // Custom sort for date field
+    if (sortColumn === 'date') {
+      valueA = new Date(valueA);
+      valueB = new Date(valueB);
+    }
+    
+    if (valueA < valueB) {
+      return sortOrder === 'asc' ? -1 : 1;
+    }
+    if (valueA > valueB) {
+      return sortOrder === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+  
+  // Update total items count
+  totalItems.value = filteredData.length;
+  
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredData.length / pagination.value.limit);
+  pagination.value.totalPages = totalPages;
+  
+  // Adjust current page if it's beyond the available pages
+  if (pagination.value.page > totalPages) {
+    pagination.value.page = Math.max(1, totalPages);
+  }
+  
+  // Calculate indices for the current page
+  const startIndex = (pagination.value.page - 1) * pagination.value.limit;
+  const endIndex = Math.min(startIndex + pagination.value.limit, filteredData.length);
+  
+  pagination.value.startIndex = startIndex;
+  pagination.value.endIndex = endIndex;
+  
+  // Get the slice of data for the current page
+  paginatedAppointments.value = filteredData.slice(startIndex, endIndex);
+}
+
+// Count of filtered rows (for the current page)
 const filteredRowsCount = computed(() => {
   return table.getFilteredRowModel().rows.length;
 });
 
-// Count of total rows
+// Count of total rows (all data)
 const totalRowsCount = computed(() => {
-  return appointments.value.length;
+  return allAppointments.value.length;
+});
+
+// Go to a specific page
+function goToPage(page) {
+  if (page < 1 || page > pagination.value.totalPages || isLoading.value) return;
+  pagination.value.page = page;
+  applyPagination();
+}
+
+// Fetch all appointments data
+async function fetchAppointments() {
+  isLoading.value = true;
+  try {
+    const response = await axios.get(`${API_URL}/api/admin/appointments`);
+    if (response.data.success) {
+      // Transform the data to match our table structure
+      allAppointments.value = response.data.appointments.map(appointment => ({
+        id: appointment.id,
+        date: appointment.appointment_date,
+        time: appointment.appointment_time,
+        patient: `${appointment.basic_info?.first_name || ''} ${appointment.basic_info?.last_name || ''}`,
+        service: appointment.procedure?.name || 'N/A',
+        status: appointment.status || 'pending',
+        // Store complete objects for detailed view
+        basic_info: appointment.basic_info,
+        procedure: appointment.procedure
+      }));
+      
+      // Apply pagination, sorting and filtering
+      applyPagination();
+    } else {
+      console.error('Failed to fetch appointments:', response.data.message);
+    }
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Update appointment status
+async function updateStatus(appointmentId, newStatus) {
+  isLoading.value = true;
+  try {
+    const response = await axios.patch(`${API_URL}/api/admin/appointments/${appointmentId}/status`, {
+      status: newStatus
+    });
+    
+    if (response.data.success) {
+      // Update the appointment in the allAppointments array
+      const appointmentIndex = allAppointments.value.findIndex(a => a.id === appointmentId);
+      if (appointmentIndex !== -1) {
+        allAppointments.value[appointmentIndex].status = newStatus;
+        // Re-apply pagination to update the current view
+        applyPagination();
+      }
+    } else {
+      console.error('Failed to update appointment status:', response.data.message);
+    }
+  } catch (error) {
+    console.error('Error updating appointment status:', error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Fetch data on component mount
+onMounted(() => {
+  fetchAppointments();
 });
 </script>
