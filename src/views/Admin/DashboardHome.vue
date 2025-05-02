@@ -31,6 +31,7 @@ const statusCounts = ref({
   checkedIn: 0,
   inConsultation: 0
 });
+const totalAppointments = ref(0);
 const loading = ref(true);
 const error = ref(null);
 
@@ -66,6 +67,20 @@ const fetchTodaySchedule = async () => {
   }
 };
 
+// Fetch total appointments count
+const fetchTotalAppointments = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/admin/total-appointments`);
+    if (response.data.success) {
+      totalAppointments.value = response.data.total;
+    } else {
+      console.error('Failed to fetch total appointments:', response.data.message);
+    }
+  } catch (err) {
+    console.error('Error fetching total appointments:', err);
+  }
+};
+
 // Format status for display
 const formatStatus = (status) => {
   if (!status) return 'Unknown';
@@ -97,6 +112,7 @@ const getStatusColor = (status) => {
 // Fetch data on component mount
 onMounted(() => {
   fetchTodaySchedule();
+  fetchTotalAppointments();
 });
 
 // Global search filter
@@ -189,10 +205,10 @@ const totalRowsCount = computed(() => {
       <Card>
         <CardHeader class="pb-2 flex items-center gap-4">
           <FileTextIcon class="w-8 h-8 text-primary" />
-          <CardTitle class="text-lg font-medium">Total Medical Records</CardTitle>
+          <CardTitle class="text-lg font-medium">Total Appointments</CardTitle>
         </CardHeader>
         <CardContent>
-          <p class="text-2xl font-bold">7,213 patients</p>
+          <p class="text-2xl font-bold">{{ totalAppointments }} records</p>
         </CardContent>
       </Card>
       <Card>
