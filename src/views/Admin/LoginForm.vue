@@ -6,15 +6,43 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import StRupertClinicImage from '@/assets/About-1.webp'
+import axios from 'axios'
 
 const email = ref('')
 const password = ref('')
-const isLoading = ref(false) // Add loading state
-const responseMessage = ref('') // Add response message state
+const isLoading = ref(false)
+const responseMessage = ref('')
 const router = useRouter()
 
-function handleLogin() {
-  router.push('/dashboard'); // Redirect to /dashboard
+async function handleLogin() {
+  isLoading.value = true
+  responseMessage.value = ''
+  
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, 
+      { email: email.value, password: password.value }
+    )
+    
+    if (response.data.success) {
+      responseMessage.value = response.data.message
+      // You might want to store user information or token in localStorage here
+      localStorage.setItem('adminUser', JSON.stringify(response.data.data))
+      // Redirect to dashboard after successful login
+      router.push('/dashboard')
+    } else {
+      responseMessage.value = response.data.message || 'Login failed'
+    }
+  } catch (error) {
+    if (error.response) {
+      responseMessage.value = error.response.data.message || 'Authentication failed'
+    } else {
+      responseMessage.value = 'Network error. Please try again later.'
+    }
+    console.error('Login error:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
