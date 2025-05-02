@@ -1,5 +1,8 @@
 <template>
-    <header class="dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full h-20 flex items-center justify-between px-[10%] shadow-lg">
+    <header :class="[
+        'dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full h-20 flex items-center justify-between shadow-lg',
+        userStore.isAnyAdmin ? 'p-4' : 'px-[10%]'
+    ]">
         <!-- Left Header: Clinic Logo -->
         <router-link to="/home" class="flex items-center gap-4">
             <img src="@/assets/Logos/StRupertLogo.svg" alt="St. Rupert Logo" class="h-12 w-12 object-contain">

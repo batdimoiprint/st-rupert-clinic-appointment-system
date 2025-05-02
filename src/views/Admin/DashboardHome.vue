@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { ref, onMounted, computed, watch } from 'vue';
+import axios from 'axios';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -20,49 +21,83 @@ import {
 } from '@tanstack/vue-table';
 import CalendarCard from '@/components/admin/CalendarCard.vue';
 
-// Define the data structure for appointments
-const appointments = ref([
-  {
-    id: 1,
-    time: '8:00 AM - 9:00 AM',
-    name: 'Agapito Dimatibag',
-    service: 'Hematology',
-    status: 'Complete',
-    statusColor: 'green',
-  },
-  {
-    id: 2,
-    time: '9:30 AM - 10:30 AM',
-    name: 'Juan Dela Cruz',
-    service: 'X-ray',
-    status: 'Ongoing',
-    statusColor: 'blue',
-  },
-  {
-    id: 3,
-    time: '11:00 AM - 12:00 PM',
-    name: 'Maria Santos',
-    service: 'Consultation',
-    status: 'Pending',
-    statusColor: 'yellow',
-  },
-  {
-    id: 4,
-    time: '1:00 PM - 2:00 PM',
-    name: 'Pedro Penduko',
-    service: 'Ultrasound',
-    status: 'Pending',
-    statusColor: 'yellow',
-  },
-  {
-    id: 5,
-    time: '2:30 PM - 3:30 PM',
-    name: 'Lucia Reyes',
-    service: 'Blood Test',
-    status: 'Scheduled',
-    statusColor: 'gray',
+// State for today's schedule data
+const todaySchedule = ref([]);
+const statusCounts = ref({
+  total: 0,
+  pending: 0,
+  complete: 0,
+  cancelled: 0,
+  checkedIn: 0,
+  inConsultation: 0
+});
+const loading = ref(true);
+const error = ref(null);
+
+// Backend URL from environment variable
+const API_URL = import.meta.env.VITE_BACKEND_URL || '';
+
+// Fetch today's schedule from backend
+const fetchTodaySchedule = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+    const response = await axios.get(`${API_URL}/api/admin/today-schedule`);
+    
+    if (response.data.success) {
+      todaySchedule.value = response.data.todaySchedule.map(appointment => ({
+        id: appointment.id,
+        time: `${appointment.appointment_time}`,
+        name: `${appointment.basic_info?.first_name || ''} ${appointment.basic_info?.last_name || ''}`,
+        service: appointment.procedure?.name || 'N/A',
+        status: formatStatus(appointment.status),
+        statusColor: getStatusColor(appointment.status),
+        rawStatus: appointment.status
+      }));
+      statusCounts.value = response.data.statusCounts;
+    } else {
+      error.value = 'Failed to fetch today\'s schedule';
+    }
+  } catch (err) {
+    console.error('Error fetching today\'s schedule:', err);
+    error.value = err.message || 'An error occurred while fetching today\'s schedule';
+  } finally {
+    loading.value = false;
   }
-]);
+};
+
+// Format status for display
+const formatStatus = (status) => {
+  if (!status) return 'Unknown';
+  
+  switch(status) {
+    case 'pending': return 'Pending';
+    case 'checked-in': return 'Checked In';
+    case 'in_consultation': return 'In Consultation';
+    case 'complete': return 'Complete';
+    case 'cancelled': return 'Cancelled';
+    default: return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+};
+
+// Get status color based on status
+const getStatusColor = (status) => {
+  if (!status) return 'gray';
+  
+  switch(status) {
+    case 'pending': return 'yellow';
+    case 'checked-in': return 'blue';
+    case 'in_consultation': return 'blue';
+    case 'complete': return 'green';
+    case 'cancelled': return 'red';
+    default: return 'gray';
+  }
+};
+
+// Fetch data on component mount
+onMounted(() => {
+  fetchTodaySchedule();
+});
 
 // Global search filter
 const globalFilter = ref('');
@@ -99,7 +134,7 @@ const columns = [
 // Create table instance with filtering
 const table = useVueTable({
   get data() {
-    return appointments.value;
+    return todaySchedule.value;
   },
   columns,
   getCoreRowModel: getCoreRowModel(),
@@ -116,12 +151,6 @@ function setGlobalFilter(value) {
   globalFilter.value = value;
 }
 
-// Function to check if a row matches the filter
-function fuzzyFilter(row, columnId, value, addMeta) {
-  const itemValue = row.getValue(columnId);
-  return String(itemValue).toLowerCase().includes(String(value).toLowerCase());
-}
-
 // Function to get appropriate background and text color classes based on status
 const getStatusClasses = (statusColor) => {
   const classes = {
@@ -129,6 +158,7 @@ const getStatusClasses = (statusColor) => {
     blue: 'bg-blue-100 text-blue-800',
     yellow: 'bg-yellow-100 text-yellow-800',
     gray: 'bg-gray-100 text-gray-800',
+    red: 'bg-red-100 text-red-800',
   };
   return classes[statusColor] || classes.gray;
 };
@@ -140,7 +170,7 @@ const filteredRowsCount = computed(() => {
 
 // Count of total rows
 const totalRowsCount = computed(() => {
-  return appointments.value.length;
+  return todaySchedule.value.length;
 });
 </script>
 
@@ -153,7 +183,7 @@ const totalRowsCount = computed(() => {
           <CardTitle class="text-lg font-medium">Today's Schedules</CardTitle>
         </CardHeader>
         <CardContent>
-          <p class="text-2xl font-bold">21 appointments</p>
+          <p class="text-2xl font-bold">{{ statusCounts.total }} appointments</p>
         </CardContent>
       </Card>
       <Card>
@@ -171,10 +201,12 @@ const totalRowsCount = computed(() => {
           <CardTitle class="text-lg font-medium">Appointments Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <p class="text-sm">Total Appointments: <span class="font-bold">21</span></p>
-          <p class="text-sm">Completed: <span class="font-bold">15</span></p>
-          <p class="text-sm">Pending: <span class="font-bold">5</span></p>
-          <p class="text-sm">Cancelled: <span class="font-bold">1</span></p>
+          <p class="text-sm">Total Appointments: <span class="font-bold">{{ statusCounts.total }}</span></p>
+          <p class="text-sm">Completed: <span class="font-bold">{{ statusCounts.complete }}</span></p>
+          <p class="text-sm">Pending: <span class="font-bold">{{ statusCounts.pending }}</span></p>
+          <p class="text-sm">Cancelled: <span class="font-bold">{{ statusCounts.cancelled }}</span></p>
+          <p class="text-sm">Checked In: <span class="font-bold">{{ statusCounts.checkedIn }}</span></p>
+          <p class="text-sm">In Consultation: <span class="font-bold">{{ statusCounts.inConsultation }}</span></p>
         </CardContent>
       </Card>
     </section>
@@ -198,10 +230,27 @@ const totalRowsCount = computed(() => {
             </div>
           </div>
           
-          <Table>
+          <div v-if="loading" class="py-8 text-center">
+            <p>Loading today's schedule...</p>
+          </div>
+          
+          <div v-else-if="error" class="py-8 text-center text-red-500">
+            <p>{{ error }}</p>
+            <button 
+              @click="fetchTodaySchedule" 
+              class="mt-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/80"
+            >
+              Retry
+            </button>
+          </div>
+          
+          <Table v-else>
             <TableCaption>
               <span v-if="filteredRowsCount < totalRowsCount">
                 Showing {{ filteredRowsCount }} of {{ totalRowsCount }} patients
+              </span>
+              <span v-else-if="totalRowsCount === 0">
+                No appointments scheduled for today.
               </span>
               <span v-else>
                 List of today's scheduled patient appointments.
