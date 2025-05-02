@@ -7,12 +7,14 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import StRupertClinicImage from '@/assets/About-1.webp'
 import axios from 'axios'
+import { useUserStore } from '@/stores/userStore'
 
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const responseMessage = ref('')
 const router = useRouter()
+const userStore = useUserStore()
 
 async function handleLogin() {
   isLoading.value = true
@@ -26,8 +28,13 @@ async function handleLogin() {
     
     if (response.data.success) {
       responseMessage.value = response.data.message
-      // You might want to store user information or token in localStorage here
+      
+      // Update the user store with the user data
+      userStore.setUser(response.data)
+      
+      // Also store in localStorage for persistence
       localStorage.setItem('adminUser', JSON.stringify(response.data.data))
+      
       // Redirect to dashboard after successful login
       router.push('/dashboard')
     } else {
