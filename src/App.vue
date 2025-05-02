@@ -7,7 +7,7 @@ import UserFooter from './components/UserFooter.vue'
   <div class = "flex flex-col min-h-screen">
     <UserHeader/>
 
-    <main class = "flex-1">
+    <main>
       <router-view/>
     </main>
 

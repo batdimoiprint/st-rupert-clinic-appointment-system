@@ -2,7 +2,7 @@
     <section class = "bg-background flex flex-col gap-10 font-Inter h-auto w-full">
         <h2 class = "bg-primary text-primary-foreground text-xl text-center font-bold w-full">About Us</h2>
         <div class = "flex flex-row justify-center gap-6"> <!-- Header Introduction -->
-            <img src = "@/assets/About/About-1.svg" class = "h-60">
+            <img src = "@/assets/About-1.webp" class = "h-60">
             <div class = "flex flex-col justify-evenly w-100">
                 <h4 class = "text-accent-blue">A Personalized Healthcare Experience Since 2005</h4>
                 <h1 class = "text-4xl font-extrabold text-accent-blue">19 years of Caring with pride and dignity</h1>

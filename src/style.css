@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Tagesschrift&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
+
 /* @import '@fullcalendar/core/index.css';
 @import '@fullcalendar/daygrid/index.css';
 @import '@fullcalendar/timegrid/index.css'; */
@@ -37,38 +39,39 @@
   --input: #E2E8F0;
   --ring: #2563EB;
   --radius: 0.5rem;
-
-  --Inter: 'Inter', sans-serif;
 }
 
 .dark {
-  --background: #020817;
+  --background: #1f283a;
   --foreground: #F8FAFC;
 
-  --card: #020817;
+  --accent-blue: #1d5c9e;
+
+  --card: #0f1629;
   --card-foreground: #F8FAFC;
 
-  --popover: #020817;
+  --popover: #0f1629;
   --popover-foreground: #F8FAFC;
 
-  --primary: #3B82F6;
-  --primary-foreground: #1E293B;
+  --primary: #0F67A9;
+  --primary-foreground: #F8FAFC;
 
-  --secondary: #1E293B;
-  --secondary-foreground: #F8FAFC;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #1E293B;
 
-  --muted: #1E293B;
+  --muted: #1a2234;
   --muted-foreground: #94A3B8;
 
-  --accent: #1E293B;
-  --accent-foreground: #F8FAFC;
+  --accent: #F5D41A;
+  --accent-foreground: #1E293B;
 
-  --destructive: #7F1D1D;
+  --destructive: #EF4444;
   --destructive-foreground: #F8FAFC;
 
   --border: #1E293B;
   --input: #1E293B;
-  --ring: #1D4ED8;
+  --ring: #2563EB;
+  --radius: 0.5rem;
 }
 
 @theme {
