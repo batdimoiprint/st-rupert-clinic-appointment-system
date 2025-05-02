@@ -1,9 +1,11 @@
 <template>
-  <div class="flex items-center justify-center bg-primary text-primary-foreground text-2xl py-2 font-bold w-full rounded-t-lg">
+  <div
+    class="flex items-center justify-center bg-primary text-primary-foreground text-2xl py-2 font-bold w-full rounded-t-lg"
+  >
     <CalendarIcon class="inline-block mr-2 w-6 h-6" />
     Appointment Form
   </div>
-  <section class="relative h-auto overflow-hidden px-[10%] py-8 pb-32 ">
+  <section class="relative h-auto overflow-hidden px-[10%] py-8 pb-32">
     <div class="flex flex-col md:flex-row w-full gap-4">
       <!-- Left column: Form (both pages) -->
       <div class="w-full md:w-1/2">
@@ -13,7 +15,8 @@
               <CardHeader>
                 <CardTitle>Appointment Information</CardTitle>
                 <CardDescription>
-                  Please provide your correct information. This will be used for your registration.
+                  Please provide your correct information. This will be used for
+                  your registration.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -22,9 +25,15 @@
                   class="flex flex-col gap-4"
                 >
                   <!-- Service, Procedure and Price in one row -->
-                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-4">
-                    <div class="flex flex-col items-start flex-1 w-full sm:w-auto">
-                      <label class="text-sm font-semibold mb-1.5 text-primary">Service</label>
+                  <div
+                    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-4"
+                  >
+                    <div
+                      class="flex flex-col items-start flex-1 w-full sm:w-auto"
+                    >
+                      <label class="text-sm font-semibold mb-1.5 text-primary"
+                        >Service</label
+                      >
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           class="border border-border bg-background hover:bg-slate-50 text-muted-foreground p-2.5 rounded-md flex text-sm items-center justify-between gap-2 w-full shadow-sm"
@@ -52,12 +61,16 @@
                         Service is required
                       </p>
                     </div>
-                    <div class="flex flex-col items-start flex-1 w-full sm:w-auto">
-                      <label class="text-sm font-semibold mb-1.5 text-primary">Procedure</label>
+                    <div
+                      class="flex flex-col items-start flex-1 w-full sm:w-auto"
+                    >
+                      <label class="text-sm font-semibold mb-1.5 text-primary"
+                        >Procedure</label
+                      >
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           class="border border-border bg-background hover:bg-slate-50 text-muted-foreground p-2.5 rounded-md flex text-sm items-center justify-between gap-2 w-full shadow-sm"
-                          :class="{'opacity-60': !formData.selectedService}"
+                          :class="{ 'opacity-60': !formData.selectedService }"
                           :disabled="!formData.selectedService"
                         >
                           <span class="font-medium">{{
@@ -84,53 +97,87 @@
                       </p>
                     </div>
                     <div class="flex flex-col items-start w-full sm:w-auto">
-                      <label class="text-sm font-semibold mb-1.5 text-primary">Price</label>
-                      <div class="bg-primary/5 border border-primary/10 px-4 py-2 rounded-md shadow-sm">
+                      <label class="text-sm font-semibold mb-1.5 text-primary"
+                        >Price</label
+                      >
+                      <div
+                        class="bg-primary/5 border border-primary/10 px-4 py-2 rounded-md shadow-sm"
+                      >
                         <h3 class="text-2xl font-bold text-primary">
-                          ₱ {{price.toLocaleString(undefined, { minimumFractionDigits: 2 })}}
+                          ₱
+                          {{
+                            price.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                            })
+                          }}
                         </h3>
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Appointment time selection with improved styling -->
                   <div class="flex flex-col items-start w-full mb-4">
-                    <label class="text-sm font-semibold mb-2 text-primary">Appointment Time</label>
-                    <RadioGroup v-model="formData.selectedTime" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '8:00 AM - 9:00 AM'}">
-                        <RadioGroupItem id="time-8am" value="8:00 AM - 9:00 AM" />
-                        <Label for="time-8am" class="cursor-pointer font-medium">8:00 AM - 9:00 AM</Label>
+                    <div class="flex flex-col items-start mb-4 w-full sm:w-1/2 ">
+                      <label class="text-sm font-semibold mb-1.5 text-primary"
+                        >Appointment Date</label
+                      >
+                      <div class="relative w-full">
+                        <input
+                          type="date"
+                          v-model="formData.selectedDate"
+                          class="border border-border bg-background hover:border-primary/50 p-2.5 text-sm rounded-md w-full shadow-sm focus:ring-1 focus:ring-primary/30 focus:border-primary"
+                          :min="minDate"
+                          @change="handleDateChange"
+                        />
+                        <CalendarIcon
+                          class="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none"
+                        />
                       </div>
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '9:00 AM - 10:00 AM'}">
-                        <RadioGroupItem id="time-9am" value="9:00 AM - 10:00 AM" />
-                        <Label for="time-9am" class="cursor-pointer font-medium">9:00 AM - 10:00 AM</Label>
-                      </div>
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '10:00 AM - 11:00 AM'}">
-                        <RadioGroupItem id="time-10am" value="10:00 AM - 11:00 AM" />
-                        <Label for="time-10am" class="cursor-pointer font-medium">10:00 AM - 11:00 AM</Label>
-                      </div>
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '11:00 AM - 12:00 PM'}">
-                        <RadioGroupItem id="time-11am" value="11:00 AM - 12:00 PM" />
-                        <Label for="time-11am" class="cursor-pointer font-medium">11:00 AM - 12:00 PM</Label>
-                      </div>
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '1:00 PM - 2:00 PM'}">
-                        <RadioGroupItem id="time-1pm" value="1:00 PM - 2:00 PM" />
-                        <Label for="time-1pm" class="cursor-pointer font-medium">1:00 PM - 2:00 PM</Label>
-                      </div>
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '3:00 PM - 4:00 PM'}">
-                        <RadioGroupItem id="time-3pm" value="3:00 PM - 4:00 PM" />
-                        <Label for="time-3pm" class="cursor-pointer font-medium">3:00 PM - 4:00 PM</Label>
-                      </div>
-                      <div class="flex items-center space-x-2 border border-border hover:border-primary/50 rounded-md px-3 py-2 transition-all cursor-pointer"
-                           :class="{'bg-primary/5 border-primary': formData.selectedTime === '4:00 PM - 5:00 PM'}">
-                        <RadioGroupItem id="time-4pm" value="4:00 PM - 5:00 PM" />
-                        <Label for="time-4pm" class="cursor-pointer font-medium">4:00 PM - 5:00 PM</Label>
+                      <p
+                        v-if="!formData.selectedDate && isNextClicked"
+                        class="text-destructive text-xs mt-1"
+                      >
+                        Please select an appointment date
+                      </p>
+                    </div>
+                    <label class="text-sm font-semibold mb-2 text-primary"
+                      >Appointment Time</label
+                    >
+
+                    <RadioGroup
+                      v-model="formData.selectedTime"
+                      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full"
+                    >
+                      <div
+                        v-for="slot in timeSlots" 
+                        :key="slot.id"
+                        class="flex items-center space-x-2 border border-border rounded-md px-3 py-2 transition-all"
+                        :class="{
+                          'bg-primary/5 border-primary': formData.selectedTime === slot.time,
+                          'hover:border-primary/50 cursor-pointer': !isTimeSlotFull(slot.id),
+                          'opacity-50 bg-gray-100 dark:bg-gray-800 cursor-not-allowed': isTimeSlotFull(slot.id)
+                        }"
+                      >
+                        <RadioGroupItem
+                          :id="`time-${slot.id}`"
+                          :value="slot.time"
+                          :disabled="isTimeSlotFull(slot.id)"
+                        />
+                        <Label 
+                          :for="`time-${slot.id}`" 
+                          class="font-medium"
+                          :class="{'cursor-pointer': !isTimeSlotFull(slot.id), 'cursor-not-allowed': isTimeSlotFull(slot.id)}"
+                        >
+                          {{ slot.time }}
+                          <span v-if="formData.selectedDate && isTimeSlotFull(slot.id)" 
+                                class="text-destructive ml-2 text-xs">
+                            (Unavailable)
+                          </span>
+                          <span v-else-if="formData.selectedDate" 
+                                class="text-primary ml-2 text-xs">
+                            ({{ getAvailableSlots(slot.id) }} available)
+                          </span>
+                        </Label>
                       </div>
                     </RadioGroup>
                     <p
@@ -140,30 +187,13 @@
                       Please select an appointment time
                     </p>
                   </div>
-                  
+
                   <!-- Date and reason with improved styling -->
                   <div class="flex flex-col sm:flex-row gap-5 w-full">
                     <div class="flex flex-col items-start w-full sm:w-1/2">
-                      <label class="text-sm font-semibold mb-1.5 text-primary">Appointment Date</label>
-                      <div class="relative w-full">
-                        <input
-                          type="date"
-                          v-model="formData.selectedDate"
-                          class="border border-border bg-background hover:border-primary/50 p-2.5 text-sm rounded-md w-full shadow-sm focus:ring-1 focus:ring-primary/30 focus:border-primary"
-                          :min="minDate"
-                        />
-                        <CalendarIcon class="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                      </div>
-                      <p
-                        v-if="!formData.selectedDate && isNextClicked"
-                        class="text-destructive text-xs mt-1"
+                      <label class="text-sm font-semibold mb-1.5 text-primary"
+                        >Reason for Appointment</label
                       >
-                        Please select an appointment date
-                      </p>
-                    </div>
-                    
-                    <div class="flex flex-col items-start w-full sm:w-1/2">
-                      <label class="text-sm font-semibold mb-1.5 text-primary">Reason for Appointment</label>
                       <Textarea
                         id="reason"
                         v-model="formData.reason"
@@ -176,8 +206,8 @@
                 </form>
               </CardContent>
               <CardFooter class="flex justify-end gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   class="w-30 hover:cursor-pointer"
                   @click="$router.push('/home')"
                 >
@@ -188,14 +218,15 @@
                   variant="default"
                   class="w-30 hover:cursor-pointer"
                   :disabled="isNextDisabled"
-                >Next</Button>
+                  >Next</Button
+                >
               </CardFooter>
             </Card>
           </div>
         </div>
-        
+
         <!-- When on page 2, this side shows the second part of the form -->
-        <div v-if="currentPage === 2" >
+        <div v-if="currentPage === 2">
           <div class="relative z-10 flex flex-col">
             <Card class="p-6">
               <CardHeader>
@@ -281,14 +312,13 @@
                   </div>
                   <div class="flex flex-col items-start">
                     <label class="text-xs font-medium">Date of Birth</label>
-                    <div class="relative ">
+                    <div class="relative">
                       <Input
                         id="dob"
                         v-model="formData.dateOfBirth"
                         type="date"
                         class="text-xs p-2 pr-8 rounded-md border border-border"
                       />
-
                     </div>
                   </div>
                   <div class="flex flex-col items-start">
@@ -301,9 +331,22 @@
                       max="99"
                       placeholder="18"
                       class="text-xs p-2 rounded-md border border-border w-full"
-                      :class="{'border-destructive': isNextClicked && formData.age && (Number(formData.age) < 18 || Number(formData.age) > 99)}"
+                      :class="{
+                        'border-destructive':
+                          isNextClicked &&
+                          formData.age &&
+                          (Number(formData.age) < 18 ||
+                            Number(formData.age) > 99),
+                      }"
                     />
-                    <p v-if="isNextClicked && formData.age && (Number(formData.age) < 18 || Number(formData.age) > 99)" class="text-destructive text-xs mt-1">
+                    <p
+                      v-if="
+                        isNextClicked &&
+                        formData.age &&
+                        (Number(formData.age) < 18 || Number(formData.age) > 99)
+                      "
+                      class="text-destructive text-xs mt-1"
+                    >
                       Age must be between 18 and 99 years
                     </p>
                   </div>
@@ -320,8 +363,8 @@
                 </form>
               </CardContent>
               <CardFooter class="flex justify-end gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   class="w-30 hover:cursor-pointer"
                   @click="$router.push('/home')"
                 >
@@ -331,7 +374,8 @@
                   @click="handlePreviousClick"
                   variant="outline"
                   class="w-30 hover:cursor-pointer"
-                >Back</Button>
+                  >Back</Button
+                >
                 <Button
                   @click="handleNextClick"
                   variant="default"
@@ -368,16 +412,23 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Right column: Image (both pages) - Hidden on mobile -->
-    <div class="hidden md:block md:w-1/2 h-full">
-      <img :src="FormPictures" alt="Form illustration" class="w-full h-140 rounded-2xl brightness-75 object-cover" />
-    </div>
+      <div class="hidden md:block md:w-1/2 h-full">
+        <img
+          :src="FormPictures"
+          alt="Form illustration"
+          class="w-full h-140 rounded-2xl brightness-75 object-cover"
+        />
+      </div>
     </div>
   </section>
 
   <!-- Guidelines Dialog - Shows on page load -->
-  <Dialog :open="showGuidelinesDialog" @update:open="showGuidelinesDialog = $event">
+  <Dialog
+    :open="showGuidelinesDialog"
+    @update:open="showGuidelinesDialog = $event"
+  >
     <DialogContent class="sm:max-w-[600px]">
       <DialogHeader>
         <DialogTitle class="text-center flex items-center justify-center gap-2">
@@ -385,42 +436,64 @@
           Appointment Guidelines
         </DialogTitle>
         <DialogDescription class="text-center">
-          Please review these important guidelines before booking your appointment
+          Please review these important guidelines before booking your
+          appointment
         </DialogDescription>
       </DialogHeader>
-      
+
       <div class="py-4">
         <div class="space-y-4">
           <div class="flex items-start gap-2">
             <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <p class="text-sm"><span class="font-semibold">Age Requirement:</span> You must be 18 years or older to book an appointment. Minors must be accompanied by a parent or guardian.</p>
+            <p class="text-sm">
+              <span class="font-semibold">Age Requirement:</span> You must be 18
+              years or older to book an appointment. Minors must be accompanied
+              by a parent or guardian.
+            </p>
           </div>
-          
-          <div class="flex items-start gap-2">
-            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <p class="text-sm"><span class="font-semibold">Advance Booking:</span> Appointments can only be booked for dates after the current day. Same-day appointments are not available online.</p>
-          </div>
-          
-          <div class="flex items-start gap-2">
-            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <p class="text-sm"><span class="font-semibold">Required Information:</span> All fields in the form must be completed with accurate information for successful booking.</p>
-          </div>
-          
-          <div class="flex items-start gap-2">
-            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <p class="text-sm"><span class="font-semibold">Email Verification:</span> A valid email address is required as you will receive a verification code to confirm your appointment.</p>
-          </div>
-          
-          <div class="flex items-start gap-2">
-            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <p class="text-sm"><span class="font-semibold">Payment:</span> Payment must be completed during the booking process to confirm your appointment.</p>
-          </div>
-          
 
-          
           <div class="flex items-start gap-2">
             <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <p class="text-sm"><span class="font-semibold">Arrival Time:</span> Please arrive 15 minutes before your scheduled appointment time with any required documents.</p>
+            <p class="text-sm">
+              <span class="font-semibold">Advance Booking:</span> Appointments
+              can only be booked for dates after the current day. Same-day
+              appointments are not available online.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <p class="text-sm">
+              <span class="font-semibold">Required Information:</span> All
+              fields in the form must be completed with accurate information for
+              successful booking.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <p class="text-sm">
+              <span class="font-semibold">Email Verification:</span> A valid
+              email address is required as you will receive a verification code
+              to confirm your appointment.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <p class="text-sm">
+              <span class="font-semibold">Payment:</span> Payment must be
+              completed during the booking process to confirm your appointment.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <CheckCircle2 class="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <p class="text-sm">
+              <span class="font-semibold">Arrival Time:</span> Please arrive 15
+              minutes before your scheduled appointment time with any required
+              documents.
+            </p>
           </div>
         </div>
       </div>
@@ -666,10 +739,12 @@
       </div>
 
       <DialogFooter class="sm:justify-center">
-        
         <Button
           v-if="paymentCompleted"
-          @click="closeVerificationDialog(); $router.push('/home')"
+          @click="
+            closeVerificationDialog();
+            $router.push('/home');
+          "
           class="w-full sm:w-auto"
         >
           Go Back Home
@@ -731,6 +806,8 @@ import axios from "axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import FormPictures from "@/assets/Form-Background.webp";
 import { medicalServices } from "@/data/medicalServices";
+// Import only the time slots structure from medicalServices
+import { timeSlots as defaultTimeSlots } from "@/data/medicalServices";
 
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -784,6 +861,12 @@ const appointmentId = ref(null);
 const paymentUrl = ref("");
 const paymentCompleted = ref(false);
 const privacyPolicyAgreed = ref(false);
+
+// Time slot data from the backend
+const timeSlots = ref(defaultTimeSlots);
+const timeSlotAvailability = ref({});
+const isLoadingTimeSlots = ref(false);
+const timeSlotError = ref("");
 
 const availableProcedures = computed(() => {
   const selectedService = formData.value.selectedService;
@@ -843,7 +926,7 @@ async function handleNextClick() {
       try {
         isSubmitting.value = true; // Start loading state
         submissionError.value = ""; // Clear any previous errors
-        
+
         // Prepare the data in the format your backend expects
         const appointmentData = {
           first_name: formData.value.firstName,
@@ -880,7 +963,9 @@ async function handleNextClick() {
           paymentUrl.value = "";
         } else {
           // Handle error from successful response with error message
-          submissionError.value = response.data.message || "Failed to submit appointment. Please try again.";
+          submissionError.value =
+            response.data.message ||
+            "Failed to submit appointment. Please try again.";
         }
         isSubmitting.value = false; // End loading state
       } catch (error) {
@@ -889,10 +974,65 @@ async function handleNextClick() {
           error.response?.data || error.message
         );
         isSubmitting.value = false; // End loading state
-        submissionError.value = error.response?.data?.message || "An error occurred. Please try again later.";
+        submissionError.value =
+          error.response?.data?.message ||
+          "An error occurred. Please try again later.";
       }
     }
   }
+}
+
+// Function to fetch time slot availability from the backend
+async function fetchTimeSlotAvailability() {
+  isLoadingTimeSlots.value = true;
+  timeSlotError.value = "";
+  
+  try {
+    // Calculate a 30-day range for availability data
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1); // Start from tomorrow
+    
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 30); // End after 30 days
+    
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+    
+    const response = await axios.get(`/api/appointment/status`, {
+      params: {
+        startDate: startDateStr,
+        endDate: endDateStr
+      }
+    });
+    
+    if (response.data.success) {
+      // Update time slots and availability from the backend response
+      if (response.data.data.timeSlots) {
+        timeSlots.value = response.data.data.timeSlots;
+      }
+      
+      if (response.data.data.timeSlotAvailability) {
+        timeSlotAvailability.value = response.data.data.timeSlotAvailability;
+      }
+    } else {
+      timeSlotError.value = response.data.message || "Failed to fetch time slot availability";
+      // Fall back to default time slots if there's an error
+      timeSlots.value = defaultTimeSlots;
+    }
+  } catch (error) {
+    console.error("Error fetching time slot availability:", error);
+    timeSlotError.value = "Failed to connect to the server. Using default availability data.";
+    // Fall back to default time slots if there's an error
+    timeSlots.value = defaultTimeSlots;
+  } finally {
+    isLoadingTimeSlots.value = false;
+  }
+}
+
+// Watch for date changes to update the UI
+function handleDateChange() {
+  // If the selectedDate changes, we might need to update something in the UI
+  // But since we already have availability data for a date range, we don't need to fetch again
 }
 
 function parseStartTime(timeRange) {
@@ -1071,5 +1211,34 @@ function acknowledgeGuidelines() {
 onMounted(() => {
   // Show guidelines dialog on component mount
   showGuidelinesDialog.value = true;
+  
+  // Fetch time slot availability from the backend
+  fetchTimeSlotAvailability();
 });
+
+// Check if a time slot is fully booked
+const isTimeSlotFull = (slotId) => {
+  if (!formData.value.selectedDate) return false;
+  
+  const dateAvailability = timeSlotAvailability.value[formData.value.selectedDate];
+  if (!dateAvailability) return false; // Date not in our availability data
+  
+  // Check if booked count equals or exceeds max capacity
+  const bookedCount = dateAvailability[slotId] || 0;
+  const slot = timeSlots.value.find(s => s.id === slotId);
+  return bookedCount >= slot.maxCapacity;
+};
+
+// Get the number of available slots for a time slot
+const getAvailableSlots = (slotId) => {
+  if (!formData.value.selectedDate) return timeSlots.value.find(s => s.id === slotId).maxCapacity;
+  
+  const dateAvailability = timeSlotAvailability.value[formData.value.selectedDate];
+  if (!dateAvailability) return timeSlots.value.find(s => s.id === slotId).maxCapacity; // No bookings for this date
+  
+  const bookedCount = dateAvailability[slotId] || 0;
+  const slot = timeSlots.value.find(s => s.id === slotId);
+  
+  return Math.max(0, slot.maxCapacity - bookedCount);
+};
 </script>
