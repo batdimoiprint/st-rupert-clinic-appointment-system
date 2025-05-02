@@ -8,6 +8,7 @@
 <script>
 import { useColorMode } from '@vueuse/core';
 import { Sun, Moon } from 'lucide-vue-next';
+import { onMounted } from 'vue';
 
 export default {
   name: 'ThemeToggle',
@@ -16,7 +17,14 @@ export default {
     Moon
   },
   setup() {
-    const mode = useColorMode();
+    const mode = useColorMode({
+      initialValue: 'light', // Set initial value to light
+    });
+
+    onMounted(() => {
+      // Ensure light mode is set on component mount
+      mode.value = 'light';
+    });
 
     const toggleTheme = () => {
       mode.value = mode.value === 'dark' ? 'light' : 'dark';
