@@ -232,10 +232,6 @@
                                           <XIcon class="w-4 h-4 mr-2 text-red-500" />
                                           <span class="text-red-700 font-medium">Cancelled</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'no-show')">
-                                          <UserXIcon class="w-4 h-4 mr-2 text-gray-500" />
-                                          <span class="text-gray-700 font-medium">No Show</span>
-                                        </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   </div>
@@ -461,7 +457,6 @@ function formatStatus(status) {
     case 'in_consultation': return 'In Consultation';
     case 'complete': return 'Complete';
     case 'cancelled': return 'Cancelled';
-    case 'no-show': return 'No Show';
     default: return status.charAt(0).toUpperCase() + status.slice(1);
   }
 };
@@ -474,7 +469,6 @@ function getStatusClass(status) {
     'in_consultation': 'bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs',
     complete: 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs',
     cancelled: 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs',
-    'no-show': 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs',
   };
   return classes[status] || classes.pending;
 };
@@ -542,7 +536,6 @@ function getStatusIcon(status) {
     case 'in_consultation': return StethoscopeIcon;
     case 'complete': return CheckIcon;
     case 'cancelled': return XIcon;
-    case 'no-show': return UserXIcon;
     default: return CalendarIcon;
   }
 }

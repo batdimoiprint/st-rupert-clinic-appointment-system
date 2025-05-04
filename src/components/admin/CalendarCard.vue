@@ -99,6 +99,28 @@ onMounted(() => {
       </div>
       <div v-else>
         <FullCalendar :options="calendarOptions" />
+        <div class="mt-4 flex justify-center gap-6">
+          <div class="flex items-center gap-2">
+            <span class="block w-3 h-3 rounded-full bg-blue-300"></span>
+            <span class="text-sm">Pending</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="block w-3 h-3 rounded-full bg-primary"></span>
+            <span class="text-sm">Checked In</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="block w-3 h-3 rounded-full bg-purple-400"></span>
+            <span class="text-sm">In Consultation</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="block w-3 h-3 rounded-full bg-green-400"></span>
+            <span class="text-sm">Complete</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="block w-3 h-3 rounded-full bg-red-500"></span>
+            <span class="text-sm">Cancelled</span>
+          </div>
+        </div>
       </div>
     </CardContent>
   </Card>
@@ -107,8 +129,8 @@ onMounted(() => {
 <style scoped>
 /* Status-based styling for events */
 :deep(.status-pending) {
-  background-color: #4b8dbf !important; /* Yellow from Tailwind theme */
-  border-color: var(--accent-foreground) !important;
+  background-color: #4c82d3 !important; /* Tailwind yellow-300 */
+  border-color: #facc15 !important;
 }
 
 :deep(.status-checked-in) {
@@ -117,13 +139,13 @@ onMounted(() => {
 }
 
 :deep(.status-in_consultation) {
-  background-color: var(--accent-blue) !important; /* Dark blue from Tailwind theme */
-  border-color: var(--primary) !important;
+  background-color: #c084fc !important; /* Tailwind purple-300 */
+  border-color: #9333ea !important;
 }
 
 :deep(.status-complete) {
-  background-color: #32CD32 !important; /* Keep green for completion */
-  border-color: #228B22 !important;
+  background-color: #4ade80 !important; /* Tailwind green-300 */
+  border-color: #22c55e !important;
 }
 
 :deep(.status-cancelled) {
