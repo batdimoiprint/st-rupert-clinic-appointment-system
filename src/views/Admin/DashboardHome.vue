@@ -93,6 +93,16 @@ const appointmentInsights = ref({
 // Backend URL from environment variable
 const API_URL = import.meta.env.VITE_BACKEND_URL || '';
 
+// Helper to format time to 12-hour AM/PM
+const formatTime12 = time24 => {
+  const [h, m] = time24.split(':');
+  let hour = parseInt(h, 10);
+  const minute = m;
+  const period = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12 || 12;
+  return `${hour}:${minute} ${period}`;
+};
+
 // Fetch schedule data based on selected date
 const fetchScheduleByDate = async (date) => {
   try {
@@ -132,7 +142,8 @@ const fetchScheduleByDate = async (date) => {
       // Format appointments for display
       todaySchedule.value = appointments.map(appointment => ({
         id: appointment.id,
-        time: `${appointment.appointment_time}`,
+        time24: appointment.appointment_time,  // retain raw 24h time
+        time: formatTime12(appointment.appointment_time),
         name: `${appointment.basic_info?.first_name || ''} ${appointment.basic_info?.last_name || ''}`,
         service: appointment.procedure?.name || 'N/A',
         status: formatStatus(appointment.status),
@@ -337,66 +348,42 @@ const totalRowsCount = computed(() => {
 // Group appointments by time frame (hour)
 const appointmentsByTimeFrame = computed(() => {
   const grouped = {};
-  
-  // Filter appointments if there's a search filter
-  const filteredAppointments = globalFilter.value 
-    ? table.getFilteredRowModel().rows.map(row => row.original)
-    : todaySchedule.value;
-    
-  // Group appointments by hour
-  filteredAppointments.forEach(appointment => {
-    // Extract hour from appointment time (assuming format like "09:30 AM")
-    const timeParts = appointment.time.split(' ');
-    const hourMinute = timeParts[0].split(':');
-    const hour = parseInt(hourMinute[0]);
-    const ampm = timeParts[1];
-    
-    // Create a formatted time frame (e.g., "9:00 AM - 10:00 AM")
-    let timeFrame;
-    if (ampm === 'AM') {
-      if (hour === 12) {
-        timeFrame = `12:00 AM - 1:00 PM`;
-      } else {
-        timeFrame = `${hour}:00 AM - ${hour + 1}:00 ${hour + 1 === 12 ? 'PM' : 'AM'}`;
-      }
-    } else { // PM
-      if (hour === 12) {
-        timeFrame = `12:00 PM - 1:00 PM`;
-      } else {
-        timeFrame = `${hour}:00 PM - ${hour + 1 === 12 ? 12 : (hour + 1) % 12}:00 ${hour + 1 >= 12 ? 'AM' : 'PM'}`;
-      }
-    }
-    
-    if (!grouped[timeFrame]) {
-      grouped[timeFrame] = [];
-    }
-    
-    grouped[timeFrame].push(appointment);
+  // Define working hour slots 8AM - 5PM
+  const slotHours = Array.from({ length: 9 }, (_, i) => 8 + i); // 8 to 16
+  slotHours.forEach(h24 => {
+    const start12 = h24 % 12 || 12;
+    const startPeriod = h24 >= 12 ? 'PM' : 'AM';
+    const end24 = h24 + 1;
+    const end12 = end24 % 12 || 12;
+    const endPeriod = end24 >= 12 ? 'PM' : 'AM';
+    const slotLabel = `${start12}:00 ${startPeriod} - ${end12}:00 ${endPeriod}`;
+    grouped[slotLabel] = [];
   });
-  
-  // Sort time frames
-  return Object.keys(grouped)
-    .sort((a, b) => {
-      // Extract first hour from time frame string
-      const getHour = (timeFrame) => {
-        const parts = timeFrame.split(' ');
-        const hourMinute = parts[0].split(':');
-        let hour = parseInt(hourMinute[0]);
-        const ampm = parts[1];
-        
-        // Convert to 24-hour format for sorting
-        if (ampm === 'PM' && hour !== 12) hour += 12;
-        if (ampm === 'AM' && hour === 12) hour = 0;
-        
-        return hour;
-      };
-      
-      return getHour(a) - getHour(b);
-    })
-    .reduce((acc, key) => {
-      acc[key] = grouped[key];
-      return acc;
-    }, {});
+
+  const filtered = globalFilter.value 
+    ? table.getFilteredRowModel().rows.map(r => r.original)
+    : todaySchedule.value;
+
+  filtered.forEach(app => {
+    const hour24 = parseInt(app.time24.split(':')[0], 10);
+    // only assign if within working hours
+    if (hour24 >= 8 && hour24 < 17) {
+      const start12 = hour24 % 12 || 12;
+      const startPeriod = hour24 >= 12 ? 'PM' : 'AM';
+      const end24 = hour24 + 1;
+      const end12 = end24 % 12 || 12;
+      const endPeriod = end24 >= 12 ? 'PM' : 'AM';
+      const slotLabel = `${start12}:00 ${startPeriod} - ${end12}:00 ${endPeriod}`;
+      if (grouped[slotLabel]) grouped[slotLabel].push(app);
+    }
+  });
+
+  // Remove empty slots
+  Object.keys(grouped).forEach(slot => {
+    if (grouped[slot].length === 0) delete grouped[slot];
+  });
+
+  return grouped;
 });
 </script>
 
