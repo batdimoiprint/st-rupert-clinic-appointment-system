@@ -1041,6 +1041,12 @@ async function handleNextClick() {
         submissionError.value = "";
         
         // Send the appointment data with correct field names
+        const serviceId = getServiceId(formData.value.selectedService);
+        const procedureId = getProcedureId(formData.value.selectedProcedure);
+
+        console.log(`Found procedure ID for '${formData.value.selectedProcedure}': ${procedureId}`);
+        console.log(`Found service ID for '${formData.value.selectedService}': ${serviceId}`);
+
         const response = await axios.post('/api/appointment/submit-appointment', {
           // Basic info fields
           first_name: formData.value.firstName,
@@ -1053,9 +1059,11 @@ async function handleNextClick() {
           address: formData.value.address,
           reason: formData.value.reason || "",
           
-          // Appointment fields - use names directly instead of IDs
-          service_name: formData.value.selectedService,
-          procedure_name: formData.value.selectedProcedure,
+          // Include both IDs and display names
+          service_id: serviceId,       // Add service ID for database
+          procedure_id: procedureId,   // Add procedure ID for database
+          service_name: formData.value.selectedService,    // Keep for display
+          procedure_name: formData.value.selectedProcedure, // Keep for display
           appointment_date: formData.value.selectedDate,
           appointment_time: formData.value.selectedTime.split(' - ')[0].trim()
         });
@@ -1185,6 +1193,18 @@ function getProcedureId(procedureName) {
       }
     }
   }
+  return null; // Default if not found
+}
+
+// Function to get service ID from the service name
+function getServiceId(serviceName) {
+  // Find the service ID in dropdown items
+  const service = dropdownItems.find(s => s.title === serviceName);
+  if (service) {
+    console.log(`Found service ID for '${serviceName}': ${service.id}`);
+    return service.id;
+  }
+  console.error("Service ID not found for:", serviceName);
   return null; // Default if not found
 }
 
