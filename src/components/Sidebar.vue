@@ -1,5 +1,5 @@
 <template>
-  <Card class="w-[280px] min-h-[600px] border-r border-border">
+  <Card class="w-[280px] min-h-[600px] max-h-72 border-r border-border">
     <CardContent class="p-6 flex flex-col justify-between h-full">
       <nav>
         <ul class="space-y-2">

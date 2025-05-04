@@ -1,213 +1,56 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">Appointments</h1>
     <Card>
-      <CardHeader>
-        <CardTitle>Upcoming Appointments</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="flex items-center justify-between py-4">
-          <div class="relative w-full max-w-sm">
-            <SearchIcon class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search appointments..."
-              v-model="globalFilter"
-              class="pl-8"
-            />
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 ">
+        <div class="flex items-center gap-4">
+          <CardTitle>Upcoming Appointments</CardTitle>
+          <div class="hidden md:flex items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-muted/60 px-2 py-1 rounded text-xs text-muted-foreground">
+              <UserCheckIcon class="h-3 w-3 text-primary" />
+              <span>Click status to update</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-muted/60 px-2 py-1 rounded text-xs text-muted-foreground">
+              <CalendarDaysIcon class="h-3 w-3 text-primary" />
+              <span>Sort by clicking headers</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-muted/60 px-2 py-1 rounded text-xs text-muted-foreground">
+              <EyeIcon class="h-3 w-3 text-primary" />
+              <span>View details</span>
+            </div>
           </div>
         </div>
-        
-        <Table>
-          <TableCaption>
-            <span v-if="filteredRowsCount < totalRowsCount">
-              Showing {{ filteredRowsCount }} of {{ totalRowsCount }} appointments
-            </span>
-            <span v-else>
-              List of upcoming patient appointments.
-            </span>
-          </TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead 
-                v-for="header in table.getHeaderGroups()[0].headers" 
-                :key="header.id"
-                :class="{ 'cursor-pointer': header.column.id !== 'actions' }"
-                @click="header.column.id !== 'actions' ? handleHeaderClick(header.column) : null"
-              >
-                <div class="flex items-center">
-                  {{ header.column.columnDef.header }}
-                  <ChevronDown v-if="sorting[0]?.id === header.column.id && sorting[0]?.desc" class="ml-2 h-4 w-4" />
-                  <ChevronUp v-else-if="sorting[0]?.id === header.column.id && !sorting[0]?.desc" class="ml-2 h-4 w-4" />
-                </div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
-              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                <template v-if="cell.column.id === 'status'">
-                  <span :class="getStatusClass(row.original.status)">
-                    {{ formatStatus(row.original.status) }}
-                  </span>
-                </template>
-                <template v-else-if="cell.column.id === 'actions'">
-                  <div class="flex space-x-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">View</Button>
-                      </DialogTrigger>
-                      <DialogContent class="sm:max-w-[625px]">
-                        <DialogHeader>
-                          <DialogTitle>Appointment Details</DialogTitle>
-                          <DialogDescription>
-                            View comprehensive appointment information
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div class="grid gap-4 py-4">
-                          <div class="grid grid-cols-1 gap-6">
-                            <div>
-                              <h3 class="text-lg font-semibold mb-2">Patient Information</h3>
-                              <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                  <h4 class="text-sm font-medium">Full Name</h4>
-                                  <p>{{ row.original.basic_info?.first_name || '' }} {{ row.original.basic_info?.last_name || '' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Gender</h4>
-                                  <p>{{ row.original.basic_info?.sex || row.original.basic_info?.gender || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Age</h4>
-                                  <p>{{ row.original.basic_info?.age || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Email Address</h4>
-                                  <p>{{ row.original.basic_info?.email || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Birthdate</h4>
-                                  <p>{{ row.original.basic_info?.birthdate || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Contact Number</h4>
-                                  <p>{{ row.original.basic_info?.contact_number || row.original.basic_info?.contact_no || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Address</h4>
-                                  <p>{{ row.original.basic_info?.address || 'N/A' }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <h3 class="text-lg font-semibold mb-2">Appointment Information</h3>
-                              <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                  <h4 class="text-sm font-medium">Service</h4>
-                                  <p>{{ row.original.procedure?.name || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Price</h4>
-                                  <p>₱{{ row.original.procedure?.price || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Schedule Date</h4>
-                                  <p>{{ row.original.date }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Schedule Time</h4>
-                                  <p>{{ row.original.time }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Status</h4>
-                                  <div class="w-full max-w-[200px]">
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" class="w-full text-left">
-                                          {{ formatStatus(row.original.status || 'pending') }}
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent class="w-full">
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'pending')">
-                                          <span class="text-gray-600 font-medium">Pending</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'checked-in')">
-                                          <span class="text-blue-600 font-medium">Checked In</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'in_consultation')">
-                                          <span class="text-purple-600 font-medium">In Consultation</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'complete')">
-                                          <span class="text-emerald-600 font-medium">Completed</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'cancelled')">
-                                          <span class="text-red-600 font-medium">Cancelled</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'no-show')">
-                                          <span class="text-gray-600 font-medium">No Show</span>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </div>
-                                </div>
-                                <div v-if="row.original.payment_status === 'succeeded'">
-                                  <h4 class="text-sm font-medium">Payment ID</h4>
-                                  <p>{{ row.original.payment_id }}</p>
-                                </div>
-                                <div v-if="row.original.payment_status === 'succeeded'">
-                                  <h4 class="text-sm font-medium">Payment Status</h4>
-                                  <p>{{ row.original.payment_status }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div v-if="row.original.medical_notes">
-                              <h3 class="text-lg font-semibold mb-2">Medical Notes</h3>
-                              <div class="p-3 border rounded bg-gray-50">
-                                <p class="whitespace-pre-wrap">{{ row.original.medical_notes }}</p>
-                              </div>
-                            </div>
-                            
-                            <div v-if="row.original.payment_status === 'succeeded'">
-                              <h3 class="text-lg font-semibold mb-2">Metadata</h3>
-                              <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                  <h4 class="text-sm font-medium">Created</h4>
-                                  <p>{{ formatDateTime(row.original.created_at) }}</p>
-                                </div>
-                                <div>
-                                  <h4 class="text-sm font-medium">Last Updated</h4>
-                                  <p>{{ formatDateTime(row.original.updated_at) }}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline">
-                            <PrinterIcon class="h-4 w-4 mr-2" />
-                            Print
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </template>
-                <template v-else>
-                  {{ cell.getValue() }}
-                </template>
-              </TableCell>
-            </TableRow>
-            <TableRow v-if="table.getRowModel().rows.length === 0">
-              <TableCell :colSpan="columns.length" class="h-24 text-center">
-                No appointments found.
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        <!-- Pagination Controls -->
-        <div class="flex items-center justify-between space-x-2 py-4">
+        <div class="relative w-full max-w-sm ml-auto flex flex-col">
+          <div class="flex items-center">
+            <div class="relative flex-1">
+              <SearchIcon class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by patient name, date, service..."
+                v-model="globalFilter"
+                class="pl-8"
+              />
+              <div class="absolute right-2 top-2.5 flex items-center gap-1">
+                <button v-if="globalFilter" @click="globalFilter = ''" class="text-muted-foreground hover:text-foreground">
+                  <XCircleIcon class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            
+            <!-- Search Results Pill - Displayed inline beside the search input -->
+            <div v-if="globalFilter && !isLoading" class="ml-2 flex items-center text-xs bg-muted/70 px-2 py-1 rounded-full">
+              <span class="font-medium text-primary">{{ filteredRowsCount }}</span>
+              <span class="text-muted-foreground ml-1">results</span>
+            </div>
+          </div>
+          
+          <!-- Search Tips displayed below the search input -->
+          <div v-if="globalFilter && !isLoading" class="mt-1 text-xs text-muted-foreground self-end">
+            <span v-if="filteredRowsCount === 0" class="text-destructive">No matches found</span>
+            <span v-else>Tip: Search by name, procedure, date, or status</span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div class="flex items-center justify-between space-x-2 pb-2">
           <div class="flex-1 text-sm text-muted-foreground">
             Showing <span class="font-medium">{{ pagination.startIndex + 1 }}</span> to 
             <span class="font-medium">{{ Math.min(pagination.endIndex, totalItems) }}</span> of 
@@ -233,6 +76,233 @@
             </Button>
           </div>
         </div>
+        <div v-if="isLoading" class="space-y-3">
+          <div class="space-y-2">
+            <!-- Skeleton for table header -->
+            <div class="flex items-center">
+              <Skeleton v-for="i in 6" :key="`header-${i}`" class="h-8 w-32 mx-2" />
+            </div>
+            <!-- Skeleton for table rows -->
+            <div v-for="i in 5" :key="`row-${i}`" class="flex items-center">
+              <Skeleton v-for="j in 6" :key="`cell-${i}-${j}`" class="h-6 w-32 mx-2" />
+            </div>
+          </div>
+        </div>
+        
+        <Table v-else>
+
+          <TableHeader>
+            <TableRow class="bg-muted/50">
+              <TableHead 
+                v-for="header in table.getHeaderGroups()[0].headers" 
+                :key="header.id"
+                :class="{ 'cursor-pointer hover:bg-muted transition-colors': header.column.id !== 'actions' }"
+                @click="header.column.id !== 'actions' ? handleHeaderClick(header.column) : null"
+              >
+                <div class="flex items-center">
+                  <component 
+                    :is="getHeaderIcon(header.column.id)" 
+                    class="mr-2 h-4 w-4 text-primary" 
+                    v-if="getHeaderIcon(header.column.id)"
+                  />
+                  {{ header.column.columnDef.header }}
+                  <ChevronDown v-if="sorting[0]?.id === header.column.id && sorting[0]?.desc" class="ml-2 h-4 w-4 text-muted-foreground" />
+                  <ChevronUp v-else-if="sorting[0]?.id === header.column.id && !sorting[0]?.desc" class="ml-2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow 
+              v-for="row in table.getRowModel().rows" 
+              :key="row.id"
+              class="hover:bg-muted/30 transition-colors"
+            >
+              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                <template v-if="cell.column.id === 'status'">
+                  <span :class="getStatusClass(row.original.status)">
+                    <component :is="getStatusIcon(row.original.status)" class="inline-block w-3 h-3 mr-1" />
+                    {{ formatStatus(row.original.status) }}
+                  </span>
+                </template>
+                <template v-else-if="cell.column.id === 'actions'">
+                  <div class="flex space-x-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" class="flex items-center">
+                          <EyeIcon class="w-3.5 h-3.5 mr-1" />
+                          View
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent class="sm:max-w-[1280px]">
+                        <DialogHeader>
+                          <DialogTitle>Appointment Details</DialogTitle>
+                          <DialogDescription>
+                            View comprehensive appointment information
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div class="grid gap-4 py-4">
+                          <div class="grid grid-cols-2 gap-6">
+                            <div class="rounded-lg border bg-card p-4 shadow-sm">
+                              <h3 class="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+                                <UserIcon class="h-5 w-5" />
+                                Patient Information
+                              </h3>
+                              <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Full Name</h4>
+                                  <p class="font-medium">{{ row.original.basic_info?.first_name || '' }} {{ row.original.basic_info?.last_name || '' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Gender</h4>
+                                  <p class="font-medium">{{ row.original.basic_info?.sex || row.original.basic_info?.gender || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Age</h4>
+                                  <p class="font-medium">{{ row.original.basic_info?.age || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Email Address</h4>
+                                  <p class="font-medium">{{ row.original.basic_info?.email || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Birthdate</h4>
+                                  <p class="font-medium">{{ formatBirthdate(row.original.basic_info?.date_of_birth) || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Contact Number</h4>
+                                  <p class="font-medium">{{ row.original.basic_info?.contact_number || row.original.basic_info?.contact_no || 'N/A' }}</p>
+                                </div>
+                                <div class="col-span-2">
+                                  <h4 class="text-sm font-medium text-muted-foreground">Address</h4>
+                                  <p class="font-medium">{{ row.original.basic_info?.address || 'N/A' }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div class="rounded-lg border bg-card p-4 shadow-sm">
+                              <h3 class="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+                                <CalendarIcon class="h-5 w-5" />
+                                Appointment Information
+                              </h3>
+                              <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Service</h4>
+                                  <p class="font-medium">{{ row.original.procedure?.name || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Price</h4>
+                                  <p class="font-medium">₱{{ row.original.procedure?.price || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Schedule Date</h4>
+                                  <p class="font-medium">{{ row.original.date }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Schedule Time</h4>
+                                  <p class="font-medium">{{ row.original.time }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="text-sm font-medium text-muted-foreground">Status</h4>
+                                  <div class="w-full max-w-[200px]">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" class="w-full text-left">
+                                          {{ formatStatus(row.original.status || 'pending') }}
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent class="w-full">
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'pending')">
+                                          <CalendarIcon class="w-4 h-4 mr-2 text-amber-500" />
+                                          <span class="text-amber-700 font-medium">Pending</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'checked-in')">
+                                          <UserCheckIcon class="w-4 h-4 mr-2 text-blue-500" />
+                                          <span class="text-blue-700 font-medium">Checked In</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'in_consultation')">
+                                          <StethoscopeIcon class="w-4 h-4 mr-2 text-purple-500" />
+                                          <span class="text-purple-700 font-medium">In Consultation</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'complete')">
+                                          <CheckIcon class="w-4 h-4 mr-2 text-emerald-500" /> 
+                                          <span class="text-emerald-700 font-medium">Completed</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'cancelled')">
+                                          <XIcon class="w-4 h-4 mr-2 text-red-500" />
+                                          <span class="text-red-700 font-medium">Cancelled</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="updateStatus(row.original.id, 'no-show')">
+                                          <UserXIcon class="w-4 h-4 mr-2 text-gray-500" />
+                                          <span class="text-gray-700 font-medium">No Show</span>
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
+                                <div v-if="row.original.payment_status === 'succeeded'" class="col-span-2">
+                                  <div class="flex items-center gap-2 mb-2">
+                                    <CheckCircleIcon class="w-5 h-5 text-green-500" />
+                                    <h4 class="text-sm font-medium text-green-600">Payment Completed</h4>
+                                  </div>
+                                  <div class="bg-green-50 border border-green-100 rounded-md p-3 flex justify-between items-center">
+                                    <div>
+                                      <p class="text-xs text-muted-foreground">Payment ID</p>
+                                      <p class="font-medium">{{ row.original.payment_id }}</p>
+                                    </div>
+                                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                                      {{ row.original.payment_status }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div v-if="row.original.medical_notes" class="rounded-lg border bg-card p-4 shadow-sm">
+                              <h3 class="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+                                <StethoscopeIcon class="h-5 w-5" />
+                                Medical Notes
+                              </h3>
+                              <div class="p-3 border rounded-md bg-muted/30">
+                                <p class="whitespace-pre-wrap text-foreground">{{ row.original.medical_notes }}</p>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </template>
+                <template v-else>
+                  {{ cell.getValue() }}
+                </template>
+              </TableCell>
+            </TableRow>
+            <TableRow v-if="table.getRowModel().rows.length === 0">
+              <TableCell :colSpan="columns.length" class="h-24 text-center">
+                No appointments found.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+
+        <!-- Pagination Controls -->
+ 
+
+        <!-- Search Results Indicator -->
+        <div v-if="globalFilter && !isLoading" class="mt-2 mb-4 flex items-center justify-between bg-muted/30 p-2 rounded-md border border-border/50">
+          <div class="flex items-center gap-2">
+            <SearchIcon class="h-4 w-4 text-primary" />
+            <p class="text-sm">
+              Search results for: <span class="font-medium">{{ globalFilter }}</span>
+              <span v-if="filteredRowsCount === 0" class="text-destructive ml-2">(No matches found)</span>
+            </p>
+          </div>
+          <div class="text-xs text-muted-foreground">
+            Tip: Search by patient name, procedure, date or status
+          </div>
+        </div>
       </CardContent>
     </Card>
   </div>
@@ -242,6 +312,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Dialog,
   DialogContent,
@@ -257,7 +328,7 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem 
 } from '@/components/ui/dropdown-menu';
-import { SearchIcon, PrinterIcon, ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { SearchIcon, PrinterIcon, ChevronDown, ChevronUp, CalendarIcon, EyeIcon, ClockIcon, UserIcon, CheckIcon, XIcon, UserCheckIcon, StethoscopeIcon, ActivityIcon, SettingsIcon, CalendarDaysIcon, UserXIcon, CheckCircleIcon, XCircleIcon } from 'lucide-vue-next';
 import { 
   Table, 
   TableBody, 
@@ -267,7 +338,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -360,6 +431,8 @@ const table = useVueTable({
 
 function setGlobalFilter(value) {
   globalFilter.value = value;
+  // Reset to first page when searching
+  pagination.value.page = 1;
   applyPagination();
 }
 
@@ -459,6 +532,32 @@ function formatDateTime(dateTime) {
   if (!dateTime) return 'N/A';
   const date = new Date(dateTime);
   return date.toLocaleString();
+}
+
+// Get icons for different statuses
+function getStatusIcon(status) {
+  switch(status) {
+    case 'pending': return CalendarIcon;
+    case 'checked-in': return UserCheckIcon;
+    case 'in_consultation': return StethoscopeIcon;
+    case 'complete': return CheckIcon;
+    case 'cancelled': return XIcon;
+    case 'no-show': return UserXIcon;
+    default: return CalendarIcon;
+  }
+}
+
+// Get icons for table header columns
+function getHeaderIcon(columnId) {
+  switch(columnId) {
+    case 'date': return CalendarDaysIcon;
+    case 'time': return ClockIcon;
+    case 'patient': return UserIcon;
+    case 'service': return StethoscopeIcon;
+    case 'status': return ActivityIcon;
+    case 'actions': return SettingsIcon;
+    default: return null;
+  }
 }
 
 // Apply client-side pagination, sorting and filtering
@@ -608,6 +707,45 @@ async function updateStatus(appointmentId, newStatus) {
   } finally {
     isLoading.value = false;
   }
+}
+
+// Watch for changes to the globalFilter and update results immediately
+watch(globalFilter, (newValue) => {
+  // Reset to first page when searching
+  pagination.value.page = 1;
+  // Apply pagination to update the view with filtered results
+  applyPagination();
+});
+
+// Format birthdate for display
+function formatBirthdate(date) {
+  if (!date) return null;
+  
+  // Check if date is already formatted or is a Date object
+  if (date instanceof Date) {
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  }
+  
+  // If it's a string in ISO format (YYYY-MM-DD)
+  try {
+    const dateObj = new Date(date);
+    if (!isNaN(dateObj.getTime())) {
+      return dateObj.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+  } catch (e) {
+    console.error('Error formatting birthdate:', e);
+  }
+  
+  // Return the original value if we can't format it
+  return date;
 }
 
 // Fetch data on component mount

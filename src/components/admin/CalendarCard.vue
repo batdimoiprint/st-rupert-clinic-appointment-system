@@ -103,28 +103,33 @@ onMounted(() => {
 <style scoped>
 /* Status-based styling for events */
 :deep(.status-pending) {
-  background-color: #FFA500 !important; /* Orange */
-  border-color: #FF8C00 !important;
+  background-color: var(--accent) !important; /* Yellow from Tailwind theme */
+  border-color: var(--accent-foreground) !important;
 }
 
 :deep(.status-checked-in) {
-  background-color: #1E90FF !important; /* Blue */
-  border-color: #0000CD !important;
+  background-color: var(--primary) !important; /* Blue from Tailwind theme */
+  border-color: var(--accent-blue) !important;
 }
 
 :deep(.status-in_consultation) {
-  background-color: #9370DB !important; /* Purple */
-  border-color: #8A2BE2 !important;
+  background-color: var(--accent-blue) !important; /* Dark blue from Tailwind theme */
+  border-color: var(--primary) !important;
 }
 
 :deep(.status-complete) {
-  background-color: #32CD32 !important; /* Green */
+  background-color: #32CD32 !important; /* Keep green for completion */
   border-color: #228B22 !important;
+}
+
+:deep(.status-cancelled) {
+  background-color: var(--destructive) !important; /* Red from Tailwind theme */
+  border-color: var(--destructive-foreground) !important;
 }
 
 :deep(.fc-event) {
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   padding: 2px 4px;
 }
 

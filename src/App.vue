@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import UserHeader from '@/components/UserHeader.vue' 
 import UserFooter from './components/UserFooter.vue'
-// No need for auth check since the userStore now reads directly from localStorage on initialization
+import { useUserStore } from '@/stores/userStore'
+
+// Get user store to check admin status
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -12,7 +15,8 @@ import UserFooter from './components/UserFooter.vue'
       <router-view/>
     </main>
 
-    <UserFooter/>
+    <!-- Only show footer for non-admin users -->
+    <UserFooter v-if="!userStore.isAnyAdmin"/>
   </div>
 </template>
 

@@ -4,7 +4,7 @@
         userStore.isAnyAdmin ? 'p-4' : 'px-[10%]'
     ]">
         <!-- Left Header: Clinic Logo -->
-        <router-link to="/home" class="flex items-center gap-4">
+        <router-link :to="userStore.isAnyAdmin ? '/dashboard' : '/home'" class="flex items-center gap-4">
             <img src="@/assets/Logos/StRupertLogo.svg" alt="St. Rupert Logo" class="h-12 w-12 object-contain">
             <div class="flex flex-col">
                 <h1 class="font-bold text-xl">St. Rupert</h1>
