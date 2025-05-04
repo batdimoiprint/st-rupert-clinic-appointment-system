@@ -15,7 +15,6 @@
               class="pl-8"
             />
           </div>
-          <Button variant="outline">Export to CSV</Button>
         </div>
         
         <Table>
