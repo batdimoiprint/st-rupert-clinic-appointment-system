@@ -107,7 +107,7 @@ onMounted(() => {
 <style scoped>
 /* Status-based styling for events */
 :deep(.status-pending) {
-  background-color: var(--accent) !important; /* Yellow from Tailwind theme */
+  background-color: #4b8dbf !important; /* Yellow from Tailwind theme */
   border-color: var(--accent-foreground) !important;
 }
 
