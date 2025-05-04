@@ -55,7 +55,7 @@
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <p
-                        v-if="!formData.selectedService && isNextClicked"
+                        v-if="!formData.selectedService && isPage1Validated"
                         class="text-destructive text-xs mt-1"
                       >
                         Service is required
@@ -90,7 +90,7 @@
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <p
-                        v-if="!formData.selectedProcedure && isNextClicked"
+                        v-if="!formData.selectedProcedure && isPage1Validated"
                         class="text-destructive text-xs mt-1"
                       >
                         Procedure is required
@@ -117,9 +117,10 @@
 
                   <!-- Appointment time selection with improved styling -->
                   <div class="flex flex-col items-start w-full mb-4">
-                    <div class="flex flex-col items-start mb-4 w-full sm:w-1/2 ">
+                    <!-- Date picker section -->
+                    <div class="flex flex-col items-start mb-4 w-full sm:w-1/2">
                       <label class="text-sm font-semibold mb-1.5 text-primary"
-                        >Appointment Date</label
+                        >Appointment Date <span class="text-xs text-muted-foreground">(Must be at least 1 day in advance)</span></label
                       >
                       <div class="relative w-full">
                         <input
@@ -134,10 +135,19 @@
                         />
                       </div>
                       <p
-                        v-if="!formData.selectedDate && isNextClicked"
+                        v-if="!formData.selectedDate && isPage1Validated"
                         class="text-destructive text-xs mt-1"
                       >
                         Please select an appointment date
+                      </p>
+                      <p
+                        v-else-if="isInvalidDate"
+                        class="text-destructive text-xs mt-1"
+                      >
+                        Cannot book for today. Please select a future date.
+                      </p>
+                      <p class="text-muted-foreground text-xs mt-1">
+                        Same-day appointments cannot be booked online.
                       </p>
                     </div>
                     <label class="text-sm font-semibold mb-2 text-primary"
@@ -181,7 +191,7 @@
                       </div>
                     </RadioGroup>
                     <p
-                      v-if="!formData.selectedTime && isNextClicked"
+                      v-if="!formData.selectedTime && isPage1Validated"
                       class="text-destructive text-xs mt-2"
                     >
                       Please select an appointment time
@@ -201,6 +211,10 @@
                         placeholder="Please describe your reason for the appointment..."
                         class="text-sm p-2.5 rounded-md border border-border w-full resize-none shadow-sm hover:border-primary/50 focus:ring-1 focus:ring-primary/30 focus:border-primary"
                       />
+                      <!-- Optional validation for reason -->
+                      <!-- <p v-if="isPage1Validated && !formData.reason" class="text-destructive text-xs mt-1">
+                        Please provide a reason for your appointment
+                      </p> -->
                     </div>
                   </div>
                 </form>
@@ -217,9 +231,7 @@
                   @click="handleNextClick"
                   variant="default"
                   class="w-30 hover:cursor-pointer"
-                  :disabled="isNextDisabled"
-                  >Next</Button
-                >
+                >Next</Button>
               </CardFooter>
             </Card>
           </div>
@@ -248,7 +260,14 @@
                       type="text"
                       placeholder="Juan"
                       class="text-xs p-2 rounded-md border border-border w-full"
+                      :class="{'border-destructive': isPage2Validated && !formData.firstName}"
                     />
+                    <p
+                      v-if="isPage2Validated && !formData.firstName"
+                      class="text-destructive text-xs mt-1"
+                    >
+                      First name is required
+                    </p>
                   </div>
                   <div class="flex flex-col items-start">
                     <label class="text-xs font-medium">Last Name</label>
@@ -258,7 +277,14 @@
                       type="text"
                       placeholder="Dela Cruz"
                       class="text-xs p-2 rounded-md border border-border w-full"
+                      :class="{'border-destructive': isPage2Validated && !formData.lastName}"
                     />
+                    <p
+                      v-if="isPage2Validated && !formData.lastName"
+                      class="text-destructive text-xs mt-1"
+                    >
+                      Last name is required
+                    </p>
                   </div>
                   <div class="flex flex-col items-start">
                     <label class="text-xs font-medium">Contact Number</label>
@@ -268,10 +294,25 @@
                       type="tel"
                       placeholder="09XXXXXXXXX"
                       class="text-xs p-2 rounded-md border border-border w-full"
+                      :class="{'border-destructive': isPage2Validated && !formData.contactNumber}"
+                      @blur="validateContactNumber"
                     />
+                    <p
+                      v-if="isPage2Validated && !formData.contactNumber"
+                      class="text-destructive text-xs mt-1"
+                    >
+                      Contact number is required
+                    </p>
+                    <p
+                      v-else-if="isPage2Validated && formData.contactNumber && !isValidContactNumber"
+                      class="text-destructive text-xs mt-1"
+                    >
+                      Please enter a valid Philippine mobile number
+                    </p>
                   </div>
+                  <!-- Update the email input field to properly show required validation -->
                   <div class="flex flex-col items-start">
-                    <label class="text-xs font-medium">Email Address</label>
+                    <label class="text-xs font-medium">Email Address <span class="text-destructive">*</span></label>
                     <Input
                       id="email"
                       v-model="formData.email"
@@ -279,14 +320,21 @@
                       placeholder="example@email.com"
                       class="text-xs p-2 rounded-md border border-border w-full"
                       :class="{
-                        'border-destructive':
-                          isNextClicked && !isValidEmail && formData.email,
+                        'border-destructive': 
+                          isPage2Validated && 
+                          (!formData.email || (!isValidEmail && formData.email))
                       }"
                       @blur="validateEmail"
                     />
                     <p
-                      v-if="isNextClicked && !isValidEmail && formData.email"
-                      class="text-destructive text-xs"
+                      v-if="isPage2Validated && !formData.email"
+                      class="text-destructive text-xs mt-1"
+                    >
+                      Email address is required
+                    </p>
+                    <p
+                      v-else-if="isPage2Validated && formData.email && !isValidEmail"
+                      class="text-destructive text-xs mt-1"
                     >
                       Please enter a valid email address
                     </p>
@@ -296,6 +344,7 @@
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         class="border border-border text-muted-foreground p-2 rounded-md flex text-xs items-center gap-2"
+                        :class="{'border-destructive': isPage2Validated && !formData.sex}"
                       >
                         <span>{{ formData.sex || "Select Sex" }}</span>
                         <ChevronDown class="w-4 h-4" />
@@ -309,47 +358,68 @@
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                  <div class="flex flex-col items-start">
-                    <label class="text-xs font-medium">Date of Birth</label>
-                    <div class="relative">
-                      <Input
-                        id="dob"
-                        v-model="formData.dateOfBirth"
-                        type="date"
-                        class="text-xs p-2 pr-8 rounded-md border border-border"
-                      />
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-start">
-                    <label class="text-xs font-medium">Age</label>
-                    <Input
-                      id="age"
-                      v-model="formData.age"
-                      type="number"
-                      min="18"
-                      max="99"
-                      placeholder="18"
-                      class="text-xs p-2 rounded-md border border-border w-full"
-                      :class="{
-                        'border-destructive':
-                          isNextClicked &&
-                          formData.age &&
-                          (Number(formData.age) < 18 ||
-                            Number(formData.age) > 99),
-                      }"
-                    />
                     <p
-                      v-if="
-                        isNextClicked &&
-                        formData.age &&
-                        (Number(formData.age) < 18 || Number(formData.age) > 99)
-                      "
+                      v-if="isPage2Validated && !formData.sex"
                       class="text-destructive text-xs mt-1"
                     >
-                      Age must be between 18 and 99 years
+                      Please select your sex
                     </p>
                   </div>
+                  <!-- Modify the Date of Birth field to trigger age calculation -->
+<div class="flex flex-col items-start">
+  <label class="text-xs font-medium">Date of Birth</label>
+  <div class="relative">
+    <Input
+      id="dob"
+      v-model="formData.dateOfBirth"
+      type="date"
+      class="text-xs p-2 pr-8 rounded-md border border-border"
+      :class="{'border-destructive': isPage2Validated && !formData.dateOfBirth}"
+      @change="calculateAge"
+      :max="maxDate"
+    />
+    <CalendarIcon class="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+  </div>
+  <p
+    v-if="isPage2Validated && !formData.dateOfBirth"
+    class="text-destructive text-xs mt-1"
+  >
+    Date of birth is required
+  </p>
+</div>
+
+<!-- Modify the Age field to show the minor message immediately -->
+<div class="flex flex-col items-start">
+  <label class="text-xs font-medium">Age</label>
+  <Input
+    id="age"
+    v-model="formData.age"
+    type="number"
+    disabled
+    class="text-xs p-2 rounded-md border border-border w-full bg-muted cursor-not-allowed"
+    :class="{
+      'border-destructive': isPage2Validated && Number(formData.age) > 99
+    }"
+  />
+  <p
+    v-if="isPage2Validated && (!formData.age && formData.age !== '0')"
+    class="text-destructive text-xs mt-1"
+  >
+    Please select a date of birth to calculate age
+  </p>
+  <p
+    v-else-if="Number(formData.age) < 18"
+    class="text-muted-foreground text-xs mt-1"
+  >
+    Minors (under 18) must be accompanied by a parent or guardian
+  </p>
+  <p
+    v-else-if="isPage2Validated && formData.age && Number(formData.age) > 99"
+    class="text-destructive text-xs mt-1"
+  >
+    Please verify your date of birth
+  </p>
+</div>
                   <div class="flex flex-col items-start col-span-2">
                     <label class="text-xs font-medium">Address</label>
                     <Input
@@ -358,7 +428,14 @@
                       type="text"
                       placeholder="Street, Barangay, Municipality"
                       class="text-xs p-2 rounded-md border border-border w-full"
+                      :class="{'border-destructive': isPage2Validated && !formData.address}"
                     />
+                    <p
+                      v-if="isPage2Validated && !formData.address"
+                      class="text-destructive text-xs mt-1"
+                    >
+                      Address is required
+                    </p>
                   </div>
                 </form>
               </CardContent>
@@ -380,7 +457,7 @@
                   @click="handleNextClick"
                   variant="default"
                   class="w-30 hover:cursor-pointer"
-                  :disabled="isNextDisabled || isSubmitting"
+                  :disabled="isSubmitting"
                 >
                   <span v-if="isSubmitting" class="flex items-center">
                     <svg
@@ -499,7 +576,7 @@
       </div>
 
       <DialogFooter>
-        <Button @click="acknowledgeGuidelines" variant="default" class="w-full">
+        <Button @click="acknowledgeGuidelines" variant="default" class="w-full hover:cursor-pointer">
           I Understand
         </Button>
       </DialogFooter>
@@ -576,7 +653,7 @@
 
         <Button
           @click="verifyOTP"
-          class="w-full"
+          class="w-full cursor:hover-pointer"
           variant="default"
           :disabled="isVerifying || !otpValue || !privacyPolicyAgreed"
         >
@@ -653,7 +730,7 @@
           <Button
             @click="goToPayment"
             variant="default"
-            class="w-full text-base py-6"
+            class="w-full text-base py-6 hover:cursor-pointer"
           >
             <CreditCard class="mr-2 h-5 w-5" />
             Proceed to Payment
@@ -838,8 +915,11 @@ const submissionError = ref("");
 
 // Date Picker
 const today = new Date();
-today.setDate(today.getDate() + 1);
+today.setDate(today.getDate() + 1); // Sets minDate to tomorrow
 const minDate = today.toISOString().split("T")[0];
+
+// Add maxDate to prevent future dates
+const maxDate = new Date().toISOString().split('T')[0];
 
 // Services Data
 const dropdownItems = medicalServices;
@@ -868,6 +948,10 @@ const timeSlotAvailability = ref({});
 const isLoadingTimeSlots = ref(false);
 const timeSlotError = ref("");
 
+// Replace the single isNextClicked with two page-specific flags
+const isPage1Validated = ref(false);
+const isPage2Validated = ref(false);
+
 const availableProcedures = computed(() => {
   const selectedService = formData.value.selectedService;
   const service = dropdownItems.find(
@@ -891,44 +975,80 @@ function handlePreviousClick() {
   currentPage.value = 1;
 }
 
-// Update your handleNextClick function:
+// Add validation for Philippine mobile number format
+const isValidContactNumber = ref(true);
+
+function validateContactNumber() {
+  // Validate Philippine mobile numbers (format: 09XXXXXXXXX, 11 digits)
+  const mobileRegex = /^09\d{9}$/;
+  isValidContactNumber.value = mobileRegex.test(formData.value.contactNumber);
+}
+
+// Update handleNextClick to use the page-specific flags
 async function handleNextClick() {
-  isNextClicked.value = true;
-
-  // Validate email
-  validateEmail();
-
-  // On page 1, just move to the next page
   if (currentPage.value === 1) {
+    isPage1Validated.value = true;
+    
+    // Run page 1 validations
     if (
       formData.value.selectedService &&
       formData.value.selectedProcedure &&
       formData.value.selectedTime &&
-      formData.value.selectedDate
+      formData.value.selectedDate &&
+      !isInvalidDate.value
     ) {
       currentPage.value = 2;
+      // Important: Don't validate page 2 yet
+    } else {
+      // Scroll to the first error message on page 1
+      setTimeout(() => {
+        const errorMessage = document.querySelector('.text-destructive');
+        if (errorMessage) {
+          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
     return;
   }
 
-  // On page 2, submit the appointment and start verification
   if (currentPage.value === 2) {
-    // Check if all required fields are filled and email is valid
-    if (
+    isPage2Validated.value = true;
+    
+    // Run all validations for page 2
+    validateEmail();
+    if (formData.value.contactNumber) {
+      validateContactNumber();
+    }
+    
+    // Check if all required fields are filled and properly validated
+    const isValid = 
       formData.value.firstName &&
       formData.value.lastName &&
       formData.value.contactNumber &&
+      isValidContactNumber.value &&
       formData.value.email &&
       isValidEmail.value &&
       formData.value.sex &&
-      formData.value.address
-    ) {
+      formData.value.dateOfBirth &&
+      formData.value.age &&
+      Number(formData.value.age) <= 99 && // Allow minors, only block ages above 99
+      formData.value.address;
+    
+    if (isValid) {
+      // Proceed with submission
       try {
-        isSubmitting.value = true; // Start loading state
-        submissionError.value = ""; // Clear any previous errors
+        isSubmitting.value = true;
+        submissionError.value = "";
+        
+        // Send the appointment data with correct field names
+        const serviceId = getServiceId(formData.value.selectedService);
+        const procedureId = getProcedureId(formData.value.selectedProcedure);
 
-        // Prepare the data in the format your backend expects
-        const appointmentData = {
+        console.log(`Found procedure ID for '${formData.value.selectedProcedure}': ${procedureId}`);
+        console.log(`Found service ID for '${formData.value.selectedService}': ${serviceId}`);
+
+        const response = await axios.post('/api/appointment/submit-appointment', {
+          // Basic info fields
           first_name: formData.value.firstName,
           last_name: formData.value.lastName,
           sex: formData.value.sex,
@@ -937,47 +1057,40 @@ async function handleNextClick() {
           date_of_birth: formData.value.dateOfBirth,
           contact_no: formData.value.contactNumber,
           address: formData.value.address,
-          reason: formData.value.reason,
-          procedure_id: getProcedureId(formData.value.selectedProcedure),
+          reason: formData.value.reason || "",
+          
+          // Include both IDs and display names
+          service_id: serviceId,       // Add service ID for database
+          procedure_id: procedureId,   // Add procedure ID for database
+          service_name: formData.value.selectedService,    // Keep for display
+          procedure_name: formData.value.selectedProcedure, // Keep for display
           appointment_date: formData.value.selectedDate,
-          appointment_time: to24HourFormat(
-            parseStartTime(formData.value.selectedTime)
-          ), // ✅
-        };
-
-        // Submit appointment to backend
-        const response = await axios.post(
-          "/api/appointment/submit-appointment",
-          appointmentData
-        );
-
+          appointment_time: formData.value.selectedTime.split(' - ')[0].trim()
+        });
+        
         if (response.data.success) {
-          // Store the appointment ID for later verification
+          // Store appointment ID for verification
           appointmentId.value = response.data.appointmentId;
-
-          // Show verification dialog
+          
+          // Show verification dialog for email verification
           showVerificationDialog.value = true;
-          otpValue.value = ""; // Clear any previous OTP
-          verificationError.value = "";
-          verificationSuccess.value = false;
-          paymentUrl.value = "";
         } else {
-          // Handle error from successful response with error message
-          submissionError.value =
-            response.data.message ||
-            "Failed to submit appointment. Please try again.";
+          submissionError.value = response.data.message || "Failed to create appointment";
         }
-        isSubmitting.value = false; // End loading state
       } catch (error) {
-        console.error(
-          "Error submitting appointment:",
-          error.response?.data || error.message
-        );
-        isSubmitting.value = false; // End loading state
-        submissionError.value =
-          error.response?.data?.message ||
-          "An error occurred. Please try again later.";
+        console.error("Error submitting appointment:", error);
+        submissionError.value = error.response?.data?.message || "An error occurred while creating your appointment";
+      } finally {
+        isSubmitting.value = false; // Important: Always reset submitting state
       }
+    } else {
+      // Scroll to the first error message
+      setTimeout(() => {
+        const errorMessage = document.querySelector('.text-destructive');
+        if (errorMessage) {
+          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
   }
 }
@@ -1033,6 +1146,22 @@ async function fetchTimeSlotAvailability() {
 function handleDateChange() {
   // If the selectedDate changes, we might need to update something in the UI
   // But since we already have availability data for a date range, we don't need to fetch again
+  // Check if the selected date is today or earlier
+  const selectedDate = new Date(formData.value.selectedDate);
+  const today = new Date();
+  
+  // Reset hours, minutes, seconds to make date comparison work correctly
+  selectedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  
+  // Check if selected date is today or in the past
+  if (selectedDate <= today) {
+    isInvalidDate.value = true;
+    // Reset the date to avoid proceeding with an invalid date
+    formData.value.selectedDate = "";
+  } else {
+    isInvalidDate.value = false;
+  }
 }
 
 function parseStartTime(timeRange) {
@@ -1064,6 +1193,18 @@ function getProcedureId(procedureName) {
       }
     }
   }
+  return null; // Default if not found
+}
+
+// Function to get service ID from the service name
+function getServiceId(serviceName) {
+  // Find the service ID in dropdown items
+  const service = dropdownItems.find(s => s.title === serviceName);
+  if (service) {
+    console.log(`Found service ID for '${serviceName}': ${service.id}`);
+    return service.id;
+  }
+  console.error("Service ID not found for:", serviceName);
   return null; // Default if not found
 }
 
@@ -1174,22 +1315,29 @@ function goToPayment() {
   }
 }
 
+// Update the isNextDisabled computed property for page 2 to include all validations
 const isNextDisabled = computed(() => {
   if (currentPage.value === 1) {
     return (
       !formData.value.selectedService ||
       !formData.value.selectedProcedure ||
       !formData.value.selectedTime ||
-      !formData.value.selectedDate
+      !formData.value.selectedDate ||
+      isInvalidDate.value
     );
   } else if (currentPage.value === 2) {
     return (
       !formData.value.firstName ||
       !formData.value.lastName ||
       !formData.value.contactNumber ||
+      !isValidContactNumber.value ||
       !formData.value.email ||
       !isValidEmail.value ||
-      !formData.value.sex
+      !formData.value.sex ||
+      !formData.value.dateOfBirth ||
+      !formData.value.age ||
+      Number(formData.value.age) > 99 || // Allow minors, only block ages above 99
+      !formData.value.address
     );
   }
   return false;
@@ -1198,6 +1346,10 @@ const isNextDisabled = computed(() => {
 const isValidEmail = ref(true);
 
 function validateEmail() {
+  if (!formData.value.email) {
+    isValidEmail.value = false;
+    return;
+  }
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   isValidEmail.value = emailRegex.test(formData.value.email);
 }
@@ -1241,4 +1393,29 @@ const getAvailableSlots = (slotId) => {
   
   return Math.max(0, slot.maxCapacity - bookedCount);
 };
+
+// Add this to your ref declarations
+const isInvalidDate = ref(false);
+
+// Function to calculate age from date of birth
+function calculateAge() {
+  if (!formData.value.dateOfBirth) {
+    formData.value.age = "";
+    return;
+  }
+  
+  const birthDate = new Date(formData.value.dateOfBirth);
+  const today = new Date();
+  
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  
+  // Adjust age if birthday hasn't occurred yet this year
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  // Update the age field
+  formData.value.age = age.toString();
+}
 </script>
