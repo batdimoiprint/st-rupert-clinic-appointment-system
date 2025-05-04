@@ -52,12 +52,16 @@ const handleEventClick = (info) => {
 // Use computed property for calendar options to ensure reactivity
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'dayGridMonth',
+  initialView: 'timeGridWeek',
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
     right: 'dayGridMonth,timeGridWeek,timeGridDay'
   },
+  allDaySlot: false,         // remove the all-day slot
+  slotMinTime: '08:00:00',   // start at 8 AM
+  slotMaxTime: '17:00:00',   // end at 5 PM
+  scrollTime: '08:00:00',    // initial scroll position
   selectable: true,
   dateClick: info => console.log('Date clicked:', info.dateStr),
   // Properly pass events as computed property
@@ -136,5 +140,13 @@ onMounted(() => {
 :deep(.fc-daygrid-event) {
   white-space: normal !important;
   align-items: center;
+}
+
+/* In month view, hide event title and only show event time */
+:deep(.fc-dayGridMonth-view .fc-event-title) {
+  display: none !important;
+}
+:deep(.fc-dayGridMonth-view .fc-event-time) {
+  display: inline !important;
 }
 </style>
