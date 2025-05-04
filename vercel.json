@@ -15,6 +15,10 @@
     {
       "source": "/404",
       "destination": "/index.html"
+    },
+    {
+      "source": "(.*)",
+      "destination": "/index.html"
     }
   ]
 }
