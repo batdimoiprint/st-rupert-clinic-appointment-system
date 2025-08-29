@@ -94,7 +94,7 @@ The production-ready files will be available in the `dist/` directory.
 ## Backend Repository
 
 The backend for this project is available at:  
-[https://github.com/kenny2125/st-rupert-clinic-appointment-backend](https://github.com/kenny2125/st-rupert-clinic-appointment-backend)
+[https://github.com/batdimoiprint/st-rupert-clinic-appointment-backend](https://github.com/kenny2125/st-rupert-clinic-appointment-backend)
 
 ## License
 
